@@ -11,8 +11,18 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Optionally fetch user data
-      setUser({ token }); // Simplified
+      // Fetch user data including assignments
+      const fetchUser = async () => {
+        try {
+          const res = await api.get('/users/me'); // Assuming an endpoint to get current user
+          setUser(res.data.data);
+        } catch (err) {
+          console.error('Failed to fetch user data:', err);
+          localStorage.removeItem('token');
+          delete api.defaults.headers.common['Authorization'];
+        }
+      };
+      fetchUser();
     }
     setLoading(false);
   }, []);
