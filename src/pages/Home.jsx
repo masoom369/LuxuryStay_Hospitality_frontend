@@ -1,5 +1,5 @@
 import { BookForm, HeroSlider, Rooms, ScrollToTop } from '../components';
-
+import { AuthContext } from '../context';
 
 const Home = () => {
 

@@ -1,4 +1,5 @@
 export { default as AdultsDropdown } from './AdultsDropdown';
+export { default as Alert } from './Alert';
 export { default as PageNotFound } from './PageNotFound';
 export { default as KidsDropdown } from './KidsDropdown';
 export { default as HeroSlider } from './HeroSlider';

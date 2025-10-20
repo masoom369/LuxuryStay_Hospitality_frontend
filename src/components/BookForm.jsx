@@ -1,5 +1,5 @@
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '.';
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context';
 
 
 const BookForm = () => {

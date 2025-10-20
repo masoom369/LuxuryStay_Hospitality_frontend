@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
-import AuthContext from '../../context/AuthContext';
-import Alert from '../../components/Alert';
+import { AuthContext } from '../../context';
+import { Alert } from '../../components';
 
 const LoginPage = () => {
   const { login } = useContext(AuthContext);

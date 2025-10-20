@@ -1,4 +1,4 @@
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoWhite } from '../assets'; // SVG Logo
@@ -19,7 +19,7 @@ const Header = () => {
     );
   });
 
-  const navLinks = ['Home', 'Rooms', 'Restaurant', 'Spa', 'Contact'];
+  const navLinks = ['Home', 'Rooms', 'About', 'Contact'];
 
   return (
     <header

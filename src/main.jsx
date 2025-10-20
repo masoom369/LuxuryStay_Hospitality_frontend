@@ -1,4 +1,4 @@
-import { RoomContext } from './context/RoomContext';
+import { RoomContext } from './context';
 import ReactDOM from 'react-dom/client'
 import React from 'react'
 import App from './App'
