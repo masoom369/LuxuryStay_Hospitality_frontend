@@ -1,33 +1,37 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Route, Routes, } from 'react-router-dom';
+import { Footer, Header, PageNotFound } from './components';
+import { Home, RoomDetails } from './pages';
 
-// Import pages (empty placeholders)
-import HomePage from './pages/public/HomePage';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import DashboardPage from './pages/shared/DashboardPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ManagerDashboard from './pages/staff/manager/ManagerDashboard';
-import ReceptionistDashboard from './pages/staff/receptionist/ReceptionistDashboard';
-import HousekeepingDashboard from './pages/staff/housekeeping/HousekeepingDashboard';
 
-function App() {
+const App = () => {
+
+  // const paths = [
+  //   { path: '/', element: <Home /> },
+  //   { path: '/room/:id', element: <RoomDetails /> },
+  //   { path: '*', element: <PageNotFound /> },
+  // ]
+
+  // const router = createBrowserRouter(paths);
+  // <RouterProvider router={router} /> 
+
   return (
-    <AuthProvider>
-      <Router>
+
+    <main className=''>
+      <BrowserRouter>
+
+        <Header />
+
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/manager/dashboard" element={<ManagerDashboard />} />
-          <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
-          <Route path="/housekeeping/dashboard" element={<HousekeepingDashboard />} />
+          <Route path={'/'} element={<Home />} />
+          <Route path={'/room/:id'} element={<RoomDetails />} />
+          <Route path={'*'} element={<PageNotFound />} />
         </Routes>
-      </Router>
-    </AuthProvider>
-  );
+
+        <Footer />
+
+      </BrowserRouter>
+    </main>
+  )
 }
 
-export default App;
+export default App
