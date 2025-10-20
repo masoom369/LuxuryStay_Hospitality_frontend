@@ -1,22 +1,13 @@
 import { BrowserRouter, Route, Routes, } from 'react-router-dom';
 import { Footer, Header, PageNotFound } from './components';
 import { Home, RoomDetails } from './pages';
-
+import { LoginPage, RegisterPage, PasswordResetPage } from './pages';
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
 
-  // const paths = [
-  //   { path: '/', element: <Home /> },
-  //   { path: '/room/:id', element: <RoomDetails /> },
-  //   { path: '*', element: <PageNotFound /> },
-  // ]
-
-  // const router = createBrowserRouter(paths);
-  // <RouterProvider router={router} /> 
-
   return (
-
-    <main className=''>
+    <AuthProvider>
       <BrowserRouter>
 
         <Header />
@@ -24,13 +15,16 @@ const App = () => {
         <Routes>
           <Route path={'/'} element={<Home />} />
           <Route path={'/room/:id'} element={<RoomDetails />} />
+          <Route path={'/login'} element={<LoginPage />} />
+          <Route path={'/register'} element={<RegisterPage />} />
+          <Route path={'/password-reset'} element={<PasswordResetPage />} />
           <Route path={'*'} element={<PageNotFound />} />
         </Routes>
 
         <Footer />
 
       </BrowserRouter>
-    </main>
+    </AuthProvider>
   )
 }
 
