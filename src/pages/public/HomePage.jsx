@@ -1,16 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { BookForm, HeroSlider, Rooms, ScrollToTop } from '../../components';
+import { AuthContext } from '../../context';
 
-const HomePage = () => {
+const Home = () => {
+
   return (
     <div>
-      <h1>Welcome to LuxuryStay Hospitality</h1>
-      <p>Your premier hotel management solution.</p>
-      <nav>
-        <Link to="/login">Login</Link> | <Link to="/register">Register</Link> | <Link to="/dashboard">Dashboard</Link>
-      </nav>
+      <ScrollToTop />
+
+      <HeroSlider />
+
+      <div className='container mx-auto relative'>
+
+        <div className='bg-accent/20 mt-4 p-4 lg:absolute lg:left-0 lg:right-0 lg:p-0 lg:-top-12 lg:z-30 lg:shadow-xl'>
+          <BookForm />
+        </div>
+
+      </div>
+
+      <Rooms />
     </div>
   );
 };
 
-export default HomePage;
+export default Home;

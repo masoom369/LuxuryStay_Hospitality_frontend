@@ -1,5 +1,5 @@
-export { default as RoomDetails } from './RoomDetails';
-export { default as Home } from './Home';
+export { default as RoomDetails } from './public/RoomDetailsPage';
+export { default as Home } from './public/HomePage';
 export { default as AdminDashboard } from './admin/AdminDashboard';
 export { default as HotelManagementInterface } from './admin/HotelManagementInterface';
 export { default as SystemSettingsPanel } from './admin/SystemSettingsPanel';

@@ -1,13 +1,15 @@
 import { useRoomContext } from '../context';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoWhite } from '../assets'; // SVG Logo
 import { LogoDark } from '../assets'; // SVG Logo
+import { AuthContext } from '../context/';
 
 
 const Header = () => {
 
   const { resetRoomFilterData } = useRoomContext();
+  const { user, logout } = useContext(AuthContext);
 
   const [header, setHeader] = useState(false);
 
@@ -19,7 +21,12 @@ const Header = () => {
     );
   });
 
-  const navLinks = ['Home', 'Rooms', 'About', 'Contact'];
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Rooms', path: '/rooms' }, // Assuming rooms page exists
+    { name: 'About', path: '/about-us' },
+    { name: 'Contact', path: '/contact-us' },
+  ];
 
   return (
     <header
@@ -43,11 +50,20 @@ const Header = () => {
         flex gap-x-4 lg:gap-x-8 font-tertiary tracking-[3px] text-[15px] items-center uppercase`}>
           {
             navLinks.map(link =>
-              <Link to="/" className='transition hover:text-accent' key={link}>
-                {link}
+              <Link to={link.path} className='transition hover:text-accent' key={link.name} onClick={link.path === '/' ? resetRoomFilterData : undefined}>
+                {link.name}
               </Link>
             )
           }
+          {/* Auth Links */}
+          {user ? (
+            <>
+              <Link to="/dashboard" className='transition hover:text-accent'>Dashboard</Link>
+              <button onClick={logout} className='transition hover:text-accent'>Logout</button>
+            </>
+          ) : (
+            <Link to="/login" className='transition hover:text-accent'>Login</Link>
+          )}
         </nav>
 
       </div>
