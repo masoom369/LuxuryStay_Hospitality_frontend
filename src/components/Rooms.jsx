@@ -1,40 +1,44 @@
-import { useRoomContext } from '../context';
-import { SpinnerDotted } from 'spinners-react';
-import { Room } from '.';
-
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { roomsData } from '../data/roomsData';
 
 const Rooms = () => {
-
-  const { rooms, loading } = useRoomContext();
+  const [rooms] = useState(roomsData);
 
   return (
     <section className='py-24'>
-
-      {
-        // overlay & spinner effect 
-        loading &&
-        <div className='h-screen w-full fixed bottom-0 top-0 bg-black/80 z-50 grid place-items-center'>
-          <SpinnerDotted />
-        </div>
-      }
-
-
-      <div className='container mx-auto lg:px-0'>
-
-        <div className='text-center'>
-          <p className='font-tertiary uppercase text-[15px] tracking-[6px]'>Hotel & Spa Adina</p>
-          <h2 className='font-primary text-[45px] mb-6'>Room & Suites</h2>
-        </div>
-
-        <div className='grid grid-cols-1 max-w-sm mx-auto gap-[30px] lg:grid-cols-3 lg:max-w-none lg:mx-0'>
-          {
-            rooms.map(room =>
-              <Room key={room.id} room={room} />
-            )
-          }
+      <div className="container mx-auto lg:px-0">
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+          {rooms.map((room) => (
+            <Link to={`/room/${room.id}`} key={room.id}>
+              <div className='bg-white shadow-lg min-h-[500px] group'>
+                {/* Room image */}
+                <div className='overflow-hidden'>
+                  <img 
+                    className='group-hover:scale-110 transition-all duration-300 w-full h-[300px] object-cover'
+                    src={room.image} 
+                    alt={room.name} 
+                  />
+                </div>
+                {/* Room details */}
+                <div className='bg-white shadow-lg max-w-[300px] mx-auto h-[60px] -translate-y-1/2 flex justify-center items-center uppercase font-tertiary tracking-[1px] font-semibold text-base'>
+                  <div className='flex justify-between w-[80%]'>
+                    <div className='flex items-center gap-x-2'>
+                      <div className='text-accent'>${room.price}</div>
+                      <div className='text-sm text-grey'>/ per night</div>
+                    </div>
+                  </div>
+                </div>
+                {/* Room info */}
+                <div className='text-center'>
+                  <h3 className='h3'>{room.name}</h3>
+                  <p className='max-w-[300px] mx-auto mb-3 lg:mb-6'>{room.description}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
-
     </section>
   );
 };
