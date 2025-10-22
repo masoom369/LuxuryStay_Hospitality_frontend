@@ -1,5 +1,4 @@
 export { default as RoomDetails } from './public/RoomDetailsPage';
-export { default as Home } from './public/HomePage';
 export { default as AdminDashboard } from './admin/AdminDashboard';
 export { default as HotelManagementInterface } from './admin/HotelManagementInterface';
 export { default as SystemSettingsPanel } from './admin/SystemSettingsPanel';
@@ -11,6 +10,7 @@ export { default as BookingHistoryManagement } from './guest/BookingHistoryManag
 export { default as FeedbackSubmissionForm } from './guest/FeedbackSubmissionForm';
 export { default as GuestProfileManagement } from './guest/GuestProfileManagement';
 export { default as ServiceRequestsInterface } from './guest/ServiceRequestsInterface';
+export { default as PrivacyPolicyPage } from './public/PrivacyPolicyPage';
 export { default as AboutUsPage } from './public/AboutUsPage';
 export { default as ContactUsPage } from './public/ContactUsPage';
 export { default as FAQPage } from './public/FAQPage';

@@ -23,7 +23,7 @@ const Header = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Rooms', path: '/rooms' }, // Assuming rooms page exists
+    { name: 'FAQ', path: '/FAQ' },
     { name: 'About', path: '/about-us' },
     { name: 'Contact', path: '/contact-us' },
   ];
