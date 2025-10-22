@@ -1,4 +1,8 @@
-function layout() {
+import React from "react";
+import { useAuth } from "../context/AuthContext";
+
+function Layout() {
+  const { user } = useAuth();
   return (
     <>
       <div className="main-wrapper">
@@ -366,6 +370,11 @@ function layout() {
                     <li>
                       <a href="attendance.html">Attendance </a>
                     </li>
+                    {user && user.assignments?.some(a => a.role === "admin") && (
+                      <li>
+                        <a href="/admin/user-management">User Management</a>
+                      </li>
+                    )}
                   </ul>
                 </li>
                 <li className="submenu">
@@ -579,4 +588,4 @@ function layout() {
     </>
   );
 }
-export default layout;
+export default Layout;

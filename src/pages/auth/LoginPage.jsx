@@ -1,11 +1,11 @@
 // LoginPage.jsx
-import React, { useState, useContext } from "react";
-import { AuthContext } from "../../context";
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Alert } from "../../components";
 import { Link } from "react-router-dom";
 
 const LoginPage = () => {
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -22,12 +22,12 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(formData.email, formData.password);
-    if (!result.success) {
-      setAlert({ type: "error", message: result.message });
-    } else {
+    try {
+      await login(formData.email, formData.password);
       setAlert({ type: "success", message: "Login successful!" });
       // Redirect or update UI accordingly
+    } catch (err) {
+      setAlert({ type: "error", message: err.message });
     }
   };
 

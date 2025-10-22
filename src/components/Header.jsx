@@ -1,15 +1,15 @@
 import { useRoomContext } from '../context';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoWhite } from '../assets'; // SVG Logo
 import { LogoDark } from '../assets'; // SVG Logo
-import { AuthContext } from '../context/';
+import { useAuth } from '../context/AuthContext';
 
 
 const Header = () => {
 
   const { resetRoomFilterData } = useRoomContext();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
 
   const [header, setHeader] = useState(false);
 

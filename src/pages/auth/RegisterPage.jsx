@@ -1,11 +1,11 @@
 // RegisterPage.jsx
-import React, { useState, useContext } from "react";
-import { AuthContext } from "../../context";
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Alert } from "../../components";
 import { Link } from "react-router-dom";
 
 const RegisterPage = () => {
-  const { register } = useContext(AuthContext);
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,10 +23,8 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await register(formData.name, formData.email, formData.password);
-    if (!result.success) {
-      setAlert({ type: "error", message: result.message });
-    } else {
+    try {
+      await register({ name: formData.name, email: formData.email, password: formData.password });
       setAlert({
         type: "success",
         message: "Registration successful! You are now logged in.",
@@ -37,6 +35,8 @@ const RegisterPage = () => {
         password: ""
       });
       // Redirect to dashboard or home
+    } catch (err) {
+      setAlert({ type: "error", message: err.message });
     }
   };
 

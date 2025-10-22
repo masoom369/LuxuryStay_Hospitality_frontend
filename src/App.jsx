@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes, } from 'react-router-dom';
 import { Footer, Header, PageNotFound } from './components';
-import { HomePage, RoomDetails, AboutUsPage, ContactUsPage, FAQPage, PrivacyPolicyPage } from './pages';
+import { HomePage, RoomDetails, AboutUsPage, ContactUsPage, FAQPage, PrivacyPolicyPage, UserManagementInterface } from './pages';
 import { LoginPage, RegisterPage, PasswordResetPage } from './pages';
 import { AuthProvider } from './context/AuthContext';
 
@@ -17,6 +17,7 @@ const App = () => {
           <Route path={'/FAQ'} element={<FAQPage />} />
           <Route path={'/privacy-policy'} element={<PrivacyPolicyPage />} />
           <Route path={'/room/:id'} element={<RoomDetails />} />
+          <Route path={'/admin/user-management'} element={<UserManagementInterface />} />
           <Route path={'/about-us'} element={<AboutUsPage />} />
           <Route path={'/contact-us'} element={<ContactUsPage />} />
           <Route path={'/login'} element={<LoginPage />} />
