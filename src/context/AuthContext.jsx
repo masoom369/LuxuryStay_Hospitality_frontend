@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];
     setError(null);
+    setLoading(false);
   };
 
   // Get current user profile
@@ -83,17 +84,17 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
-      const res = await api.get(`/users/${user._id}`);
+      const res = await api.get(`/users/${user?._id}`);
       setUser(res.data.data);
       return res.data.data;
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       // If token is invalid, logout
       if (err.response?.status === 401) {
         logout();
       } else {
         // For non-401 errors, don't logout, just set error
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       }
       throw err;
     } finally {

@@ -9,16 +9,18 @@ const UserAddEditModal = ({ isOpen, onClose, user, onSave }) => {
     role: '',
     hotel: ''
   });
+  const [hotels, setHotels] = useState([]);
   const [isEdit] = useState(!!user);
 
   useEffect(() => {
+    fetchHotels();
     if (user) {
       setFormData({
         name: user.name || '',
         email: user.email || '',
         password: '', // Password not pre-filled for security
         role: user.assignments?.[0]?.role || '',
-        hotel: user.hotel || ''
+        hotel: user.assignments?.[0]?.hotel || ''
       });
     } else {
       setFormData({
@@ -30,6 +32,15 @@ const UserAddEditModal = ({ isOpen, onClose, user, onSave }) => {
       });
     }
   }, [user]);
+
+  const fetchHotels = async () => {
+    try {
+      const res = await api.get('/hotels');
+      setHotels(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch hotels:', err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -117,13 +128,20 @@ const UserAddEditModal = ({ isOpen, onClose, user, onSave }) => {
               </div>
               <div className="form-group">
                 <label>Hotel</label>
-                <input
-                  type="text"
+                <select
                   className="form-control"
                   name="hotel"
                   value={formData.hotel}
                   onChange={handleChange}
-                />
+                  required
+                >
+                  <option value="">Select Hotel</option>
+                  {hotels.map((hotel) => (
+                    <option key={hotel._id} value={hotel._id}>
+                      {hotel.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="modal-footer">

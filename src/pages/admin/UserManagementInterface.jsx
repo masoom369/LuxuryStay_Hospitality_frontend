@@ -6,6 +6,7 @@ import UserAddEditModal from "../../components/UserAddEditModal";
 const UserManagementInterface = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -18,7 +19,22 @@ const UserManagementInterface = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchHotels();
   }, []);
+
+  const fetchHotels = async () => {
+    try {
+      const res = await api.get('/hotels');
+      setHotels(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch hotels:', err);
+    }
+  };
+
+  const getHotelName = (hotelId) => {
+    const hotel = hotels.find(h => h._id === hotelId);
+    return hotel ? hotel.name : hotelId;
+  };
 
   const fetchUsers = async () => {
     try {
@@ -145,7 +161,7 @@ const UserManagementInterface = () => {
                           {u.assignments?.map((a) => a.role).join(", ") ||
                             "None"}
                         </td>
-                        <td>{u.hotel || "N/A"}</td>
+                        <td>{getHotelName(u.assignments?.[0]?.hotel) || "N/A"}</td>
                         <td className="text-right">
                           <div className="dropdown dropdown-action">
                             <a
