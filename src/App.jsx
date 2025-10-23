@@ -1,35 +1,40 @@
 import { BrowserRouter, Route, Routes, } from 'react-router-dom';
 import { Footer, Header, PageNotFound } from './components';
-import { HomePage, RoomDetails, AboutUsPage, ContactUsPage, FAQPage, PrivacyPolicyPage, UserManagementInterface } from './pages';
+import { HomePage, RoomDetails, AboutUsPage, ContactUsPage, FAQPage, PrivacyPolicyPage, UserManagementInterface, DashboardPage } from './pages';
 import { LoginPage, RegisterPage, PasswordResetPage } from './pages';
 import { AuthProvider } from './context/AuthContext';
+import Layout from './layout/Layout';
+import { HelmetProvider } from 'react-helmet-async';
 
 const App = () => {
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <HelmetProvider>
+      <AuthProvider>
+        <BrowserRouter>
 
-        <Header />
+          <Header />
 
-        <Routes>
-          <Route path={'/'} element={<HomePage />} />
-          <Route path={'/FAQ'} element={<FAQPage />} />
-          <Route path={'/privacy-policy'} element={<PrivacyPolicyPage />} />
-          <Route path={'/room/:id'} element={<RoomDetails />} />
-          <Route path={'/admin/user-management'} element={<UserManagementInterface />} />
-          <Route path={'/about-us'} element={<AboutUsPage />} />
-          <Route path={'/contact-us'} element={<ContactUsPage />} />
-          <Route path={'/login'} element={<LoginPage />} />
-          <Route path={'/register'} element={<RegisterPage />} />
-          <Route path={'/password-reset'} element={<PasswordResetPage />} />
-          <Route path={'*'} element={<PageNotFound />} />
-        </Routes>
+          <Routes>
+            <Route path={'/'} element={<HomePage />} />
+            <Route path={'/FAQ'} element={<FAQPage />} />
+            <Route path={'/privacy-policy'} element={<PrivacyPolicyPage />} />
+            <Route path={'/room/:id'} element={<RoomDetails />} />
+            <Route path={'/dashboard'} element={<Layout><DashboardPage /></Layout>} />
+            <Route path={'/admin/user-management'} element={<Layout><UserManagementInterface /></Layout>} />
+            <Route path={'/about-us'} element={<AboutUsPage />} />
+            <Route path={'/contact-us'} element={<ContactUsPage />} />
+            <Route path={'/login'} element={<LoginPage />} />
+            <Route path={'/register'} element={<RegisterPage />} />
+            <Route path={'/password-reset'} element={<PasswordResetPage />} />
+            <Route path={'*'} element={<PageNotFound />} />
+          </Routes>
 
-        <Footer />
+          <Footer />
 
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </HelmetProvider>
   )
 }
 
