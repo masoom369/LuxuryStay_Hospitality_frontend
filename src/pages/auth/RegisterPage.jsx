@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Alert } from "../../components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,7 +35,7 @@ const RegisterPage = () => {
         email: "",
         password: ""
       });
-      // Redirect to dashboard or home
+      navigate('/dashboard');
     } catch (err) {
       setAlert({ type: "error", message: err.message });
     }

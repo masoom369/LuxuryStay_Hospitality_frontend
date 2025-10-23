@@ -12,7 +12,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +31,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userWithId);
       setToken(newToken);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userWithId));
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       return userWithId;
     } catch (err) {
@@ -49,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userWithId);
       setToken(newToken);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userWithId));
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       return userWithId;
     } catch (err) {
@@ -64,17 +69,21 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];
     setError(null);
   };
 
   // Get current user profile
   const getProfile = async () => {
-    if (!token) return null;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) return null;
+
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/users/me');
+      api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
+      const res = await api.get(`/users/${user._id}`);
       setUser(res.data.data);
       return res.data.data;
     } catch (err) {
@@ -82,6 +91,9 @@ export const AuthProvider = ({ children }) => {
       // If token is invalid, logout
       if (err.response?.status === 401) {
         logout();
+      } else {
+        // For non-401 errors, don't logout, just set error
+        setError(err.message);
       }
       throw err;
     } finally {
@@ -110,7 +122,6 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      // Assuming there's an endpoint for changing password, adjust if needed
       await api.put('/users/change-password', { currentPassword, newPassword });
       return true;
     } catch (err) {
@@ -164,20 +175,23 @@ export const AuthProvider = ({ children }) => {
   // Auto-login on app start
   useEffect(() => {
     const initializeAuth = async () => {
-      if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const storedToken = localStorage.getItem('token');
+      
+      if (storedToken) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         try {
           await getProfile();
         } catch (err) {
           // Token might be expired, logout
           logout();
         }
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initializeAuth();
-  }, []);
+  }, []); // Empty dependency array is fine now
 
   const value = {
     user,

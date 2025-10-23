@@ -2,9 +2,10 @@
 import React, { useState } from "react";
 import { Alert } from "../../components";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 const PasswordResetPage = () => {
+  const { forgotPassword } = useAuth();
   const [formData, setFormData] = useState({
     email: ""
   });
@@ -21,16 +22,16 @@ const PasswordResetPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/users/forgot-password', { email: formData.email });
+      await forgotPassword(formData.email);
       setAlert({
         type: "success",
-        message: response.data.message || "Password reset link sent to your email!",
+        message: "Password reset link sent to your email!",
       });
       setFormData({ email: "" });
     } catch (error) {
       setAlert({
         type: "error",
-        message: error.response?.data?.message || "Failed to send reset link. Please try again.",
+        message: error.message || "Failed to send reset link. Please try again.",
       });
     }
   };

@@ -16,7 +16,7 @@ const HeroSlider = () => {
         delay: 3000,
         disableOnInteraction: false,
       }}
-      className='heroSlider h-[400px] lg:h-[510px]'
+      className='heroSlider h-[480px] lg:h-[510px]'
     >
       {
         sliderData.map(({ id, title, bg, btnNext }) =>

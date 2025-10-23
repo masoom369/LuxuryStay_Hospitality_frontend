@@ -51,7 +51,7 @@ const UserManagementInterface = () => {
 
   const handleDeactivateUser = async (id) => {
     try {
-      await api.delete(`/users/${id}`);
+      await api.put(`/users/${id}/admin/deactivate`, { isActive: false });
       fetchUsers();
     } catch (err) {
       console.error("Failed to deactivate user:", err);

@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Alert } from "../../components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -25,7 +26,7 @@ const LoginPage = () => {
     try {
       await login(formData.email, formData.password);
       setAlert({ type: "success", message: "Login successful!" });
-      // Redirect or update UI accordingly
+      navigate('/dashboard');
     } catch (err) {
       setAlert({ type: "error", message: err.message });
     }
