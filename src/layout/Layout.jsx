@@ -17,11 +17,11 @@ function Layout({ children }) {
           href="/assets/plugins/fontawesome/css/all.min.css"
         />
         <link rel="stylesheet" href="/assets/css/feathericon.min.css" />
-        <link
-          rel="stylesheet"
+        {/* <link
+          rel="stylehseet"
           href="https://cdn.oesmith.co.uk/morris-0.5.1.css"
         />
-        <link rel="stylesheet" href="/assets/plugins/morris/morris.css" />
+        <link rel="stylesheet" href="/assets/plugins/morris/morris.css" /> */}
         <link rel="stylesheet" href="/assets/css/style.css" />
       </Helmet>
       <div className="main-wrapper">
@@ -252,127 +252,6 @@ function Layout({ children }) {
                 <li className="list-divider" />
                 <li className="submenu">
                   <a href="#">
-                    <i className="fas fa-suitcase" /> <span> Booking </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="all-booking.html"> All Booking </a>
-                    </li>
-                    <li>
-                      <a href="edit-booking.html"> Edit Booking </a>
-                    </li>
-                    <li>
-                      <a href="add-booking.html"> Add Booking </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-user" /> <span> Customers </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="all-customer.html"> All customers </a>
-                    </li>
-                    <li>
-                      <a href="edit-customer.html"> Edit Customer </a>
-                    </li>
-                    <li>
-                      <a href="add-customer.html"> Add Customer </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-key" /> <span> Rooms </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="all-rooms.html">All Rooms </a>
-                    </li>
-                    <li>
-                      <a href="edit-room.html"> Edit Rooms </a>
-                    </li>
-                    <li>
-                      <a href="add-room.html"> Add Rooms </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-user" /> <span> Staff </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="all-staff.html">All Staff </a>
-                    </li>
-                    <li>
-                      <a href="edit-staff.html"> Edit Staff </a>
-                    </li>
-                    <li>
-                      <a href="add-staff.html"> Add Staff </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="pricing.html">
-                    <i className="far fa-money-bill-alt" /> <span>Pricing</span>
-                  </a>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-share-alt" /> <span> Apps </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="chat.html">
-                        <i className="fas fa-comments" />
-                        <span> Chat </span>
-                      </a>
-                    </li>
-                    <li className="submenu">
-                      <a href="#">
-                        <i className="fas fa-video camera" />
-                        <span> Calls </span> <span className="menu-arrow" />
-                      </a>
-                      <ul className="submenu_class" style={{ display: "none" }}>
-                        <li>
-                          <a href="voice-call.html"> Voice Call </a>
-                        </li>
-                        <li>
-                          <a href="video-call.html"> Video Call </a>
-                        </li>
-                        <li>
-                          <a href="incoming-call.html"> Incoming Call </a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li className="submenu">
-                      <a href="#">
-                        <i className="fas fa-envelope" /> <span> Email </span>
-                        <span className="menu-arrow" />
-                      </a>
-                      <ul className="submenu_class" style={{ display: "none" }}>
-                        <li>
-                          <a href="compose.html">Compose Mail </a>
-                        </li>
-                        <li>
-                          <a href="inbox.html"> Inbox </a>
-                        </li>
-                        <li>
-                          <a href="mail-veiw.html"> Mail Veiw </a>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
                     <i className="fas fa-user" /> <span> Employees </span>
                     <span className="menu-arrow" />
                   </a>
@@ -399,78 +278,6 @@ function Layout({ children }) {
                 </li>
                 <li className="submenu">
                   <a href="#">
-                    <i className="far fa-money-bill-alt" />
-                    <span> Accounts </span> <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="invoices.html">Invoices </a>
-                    </li>
-                    <li>
-                      <a href="payments.html">Payments </a>
-                    </li>
-                    <li>
-                      <a href="expenses.html">Expenses </a>
-                    </li>
-                    <li>
-                      <a href="taxes.html">Taxes </a>
-                    </li>
-                    <li>
-                      <a href="provident-fund.html">Provident Fund </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-book" /> <span> Payroll </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="salary.html">Employee Salary </a>
-                    </li>
-                    <li>
-                      <a href="salary-veiw.html">Payslip </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="calendar.html">
-                    <i className="fas fa-calendar-alt" /> <span>Calendar</span>
-                  </a>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fe fe-table" /> <span> Blog </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="blog.html">Blog </a>
-                    </li>
-                    <li>
-                      <a href="blog-details.html">Blog Veiw </a>
-                    </li>
-                    <li>
-                      <a href="add-blog.html">Add Blog </a>
-                    </li>
-                    <li>
-                      <a href="edit-blog.html">Edit Blog </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="assets.html">
-                    <i className="fas fa-cube" /> <span>Assests</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="activities.html">
-                    <i className="far fa-bell" /> <span>Activities</span>
-                  </a>
-                </li>
-                <li className="submenu">
-                  <a href="#">
                     <i className="fe fe-table" /> <span> Reports </span>
                     <span className="menu-arrow" />
                   </a>
@@ -487,61 +294,6 @@ function Layout({ children }) {
                   <a href="settings.html">
                     <i className="fas fa-cog" /> <span>Settings</span>
                   </a>
-                </li>
-                <li className="list-divider" />
-                <li className="menu-title mt-3">
-                  <span>UI ELEMENTS</span>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-laptop" /> <span> Components </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="uikit.html">UI Kit </a>
-                    </li>
-                    <li>
-                      <a href="typography.html">Typography </a>
-                    </li>
-                    <li>
-                      <a href="tabs.html">Tabs </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-edit" /> <span> Forms </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="form-basic-inputs.html">Basic Input </a>
-                    </li>
-                    <li>
-                      <a href="form-input-groups.html">Input Groups </a>
-                    </li>
-                    <li>
-                      <a href="form-horizontal.html">Horizontal Form </a>
-                    </li>
-                    <li>
-                      <a href="form-vertical.html">Vertical Form </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-table" /> <span> Tables </span>
-                    <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="tables-basic.html">Basic Table </a>
-                    </li>
-                    <li>
-                      <a href="tables-datatables.html">Data Table </a>
-                    </li>
-                  </ul>
                 </li>
                 <li className="list-divider" />
                 <li className="menu-title mt-3">
@@ -582,20 +334,6 @@ function Layout({ children }) {
                     </li>
                     <li>
                       <a href="blank-page.html">Blank Page </a>
-                    </li>
-                  </ul>
-                </li>
-                <li className="submenu">
-                  <a href="#">
-                    <i className="fas fa-share-alt" />
-                    <span> Multi Level </span> <span className="menu-arrow" />
-                  </a>
-                  <ul className="submenu_class" style={{ display: "none" }}>
-                    <li>
-                      <a href="">Level 1 </a>
-                    </li>
-                    <li>
-                      <a href="">Level 2 </a>
                     </li>
                   </ul>
                 </li>

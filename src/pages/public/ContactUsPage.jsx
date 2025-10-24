@@ -23,7 +23,7 @@ const ContactUsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/contact-us', formData);
+      const response = await api.post('/contact', formData);
       setAlert({
         type: "success",
         message: response.data.message || "Thank you for contacting us! We will get back to you soon.",

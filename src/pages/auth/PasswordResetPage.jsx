@@ -49,6 +49,7 @@ const PasswordResetPage = () => {
       </div>
 
       {/* Form Section */}
+      <div className="bg-accent/20">
       <div className="container mx-auto py-14">
         <div className="flex justify-center">
           <div className="w-full max-w-md">
@@ -101,6 +102,7 @@ const PasswordResetPage = () => {
             </form>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

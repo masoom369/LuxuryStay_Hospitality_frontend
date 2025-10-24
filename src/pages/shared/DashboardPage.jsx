@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
@@ -10,17 +10,17 @@ const DashboardPage = () => {
     if (user && user.assignments && user.assignments.length > 0) {
       const primaryRole = user.assignments[0].role;
       switch (primaryRole) {
-        case 'admin':
-          navigate('/admin/dashboard');
+        case "admin":
+          navigate("/admin/dashboard");
           break;
-        case 'manager':
-          navigate('/manager/dashboard');
+        case "manager":
+          navigate("/manager/dashboard");
           break;
-        case 'receptionist':
-          navigate('/receptionist/dashboard');
+        case "receptionist":
+          navigate("/receptionist/dashboard");
           break;
-        case 'housekeeping':
-          navigate('/housekeeping/dashboard');
+        case "housekeeping":
+          navigate("/housekeeping/dashboard");
           break;
         default:
           // Stay on generic dashboard or handle guest
@@ -29,20 +29,7 @@ const DashboardPage = () => {
     }
   }, [user, navigate]);
 
-  return (
-    <div>
-      <h2>Dashboard</h2>
-      {user ? (
-        <div>
-          <p>Welcome, {user.name}!</p>
-          <p>Role: {user.assignments && user.assignments.length > 0 ? user.assignments[0].role : 'Guest'}</p>
-          <button onClick={logout}>Logout</button>
-        </div>
-      ) : (
-        <p>Please login to access dashboard.</p>
-      )}
-    </div>
-  );
+  return <>{user ? <></> : navigate("/login")}</>;
 };
 
 export default DashboardPage;

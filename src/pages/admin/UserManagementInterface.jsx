@@ -6,6 +6,7 @@ import UserAddEditModal from "../../components/UserAddEditModal";
 const UserManagementInterface = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -16,6 +17,11 @@ const UserManagementInterface = () => {
   });
   const [editingUser, setEditingUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    userName: "",
+    role: "",
+    hotel: "",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -24,44 +30,28 @@ const UserManagementInterface = () => {
 
   const fetchHotels = async () => {
     try {
-      const res = await api.get('/hotels');
+      const res = await api.get("/hotels");
       setHotels(res.data.data);
     } catch (err) {
-      console.error('Failed to fetch hotels:', err);
+      console.error("Failed to fetch hotels:", err);
     }
   };
 
   const getHotelName = (hotelId) => {
-    const hotel = hotels.find(h => h._id === hotelId);
+    const hotel = hotels.find((h) => h._id === hotelId);
     return hotel ? hotel.name : hotelId;
   };
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const res = await api.get("/users");
+      const res = await api.get("/users/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setUsers(res.data.data);
+      setFilteredUsers(res.data.data);
     } catch (err) {
       console.error("Failed to fetch users:", err);
-    }
-  };
-
-  const handleCreateStaff = async () => {
-    try {
-      await api.post("/users/create-staff", newUser);
-      setNewUser({ name: "", email: "", password: "", role: "", hotel: "" });
-      fetchUsers();
-    } catch (err) {
-      console.error("Failed to create staff:", err);
-    }
-  };
-
-  const handleUpdateUser = async (id, updates) => {
-    try {
-      await api.put(`/users/${id}`, updates);
-      setEditingUser(null);
-      fetchUsers();
-    } catch (err) {
-      console.error("Failed to update user:", err);
     }
   };
 
@@ -72,6 +62,35 @@ const UserManagementInterface = () => {
     } catch (err) {
       console.error("Failed to deactivate user:", err);
     }
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({ ...filters, [name]: value });
+  };
+
+  const handleSearch = () => {
+    let filtered = users;
+
+    if (filters.userName) {
+      filtered = filtered.filter((u) =>
+        u.name.toLowerCase().includes(filters.userName.toLowerCase())
+      );
+    }
+
+    if (filters.role) {
+      filtered = filtered.filter((u) =>
+        u.assignments?.some((a) => a.role === filters.role)
+      );
+    }
+
+    if (filters.hotel) {
+      filtered = filtered.filter((u) =>
+        u.assignments?.some((a) => a.hotel === filters.hotel)
+      );
+    }
+
+    setFilteredUsers(filtered);
   };
 
   return (
@@ -94,49 +113,81 @@ const UserManagementInterface = () => {
           </div>
         </div>
       </div>
+
+      {/* Filters */}
       <div className="row">
         <div className="col-lg-12">
           <form>
             <div className="row formtype">
               <div className="col-md-3">
                 <div className="form-group">
-                  <label>User ID</label>
-                  <input type="text" className="form-control" />
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="form-group">
                   <label>User Name</label>
-                  <input type="text" className="form-control" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="userName"
+                    value={filters.userName}
+                    onChange={handleFilterChange}
+                  />
                 </div>
               </div>
+
               <div className="col-md-3">
                 <div className="form-group">
                   <label>Role</label>
-                  <select className="form-control">
-                    <option>Admin</option>
-                    <option>Manager</option>
-                    <option>Receptionist</option>
-                    <option>Housekeeping</option>
+                  <select
+                    className="form-control"
+                    name="role"
+                    value={filters.role}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">All</option>
+                    <option>admin</option>
+                    <option>manager</option>
+                    <option>receptionist</option>
+                    <option>housekeeping</option>
+                    <option>guest</option>
                   </select>
                 </div>
               </div>
+
+              <div className="col-md-3">
+                <div className="form-group">
+                  <label>Hotel</label>
+                  <select
+                    className="form-control"
+                    name="hotel"
+                    value={filters.hotel}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">All Hotels</option>
+                    {hotels.map((hotel) => (
+                      <option key={hotel._id} value={hotel._id}>
+                        {hotel.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="col-md-3">
                 <div className="form-group">
                   <label>Search</label>
-                  <a
-                    href="#"
+                  <button
+                    type="button"
                     className="btn btn-success btn-block mt-0 search_button"
+                    onClick={handleSearch}
                   >
-                    {" "}
-                    Search{" "}
-                  </a>
+                    Search
+                  </button>
                 </div>
               </div>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Table */}
       <div className="row">
         <div className="col-sm-12">
           <div className="card">
@@ -153,49 +204,48 @@ const UserManagementInterface = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
-                      <tr key={u._id}>
-                        <td>{u.name}</td>
-                        <td>{u.email}</td>
-                        <td>
-                          {u.assignments?.map((a) => a.role).join(", ") ||
-                            "None"}
-                        </td>
-                        <td>{getHotelName(u.assignments?.[0]?.hotel) || "N/A"}</td>
-                        <td className="text-right">
-                          <div className="dropdown dropdown-action">
-                            <a
-                              href="#"
-                              className="action-icon dropdown-toggle"
-                              data-toggle="dropdown"
-                              aria-expanded="false"
-                            >
-                              <i className="fas fa-ellipsis-v ellipse_color"></i>
-                            </a>
-                            <div className="dropdown-menu dropdown-menu-right">
-                              <a
-                                className="dropdown-item"
+                    {filteredUsers.length > 0 ? (
+                      filteredUsers.map((u) => (
+                        <tr key={u._id}>
+                          <td>{u.name}</td>
+                          <td>{u.email}</td>
+                          <td>
+                            {u.assignments?.map((a) => a.role).join(", ") ||
+                              "None"}
+                          </td>
+                          <td>
+                            {getHotelName(u.assignments?.[0]?.hotel) || "N/A"}
+                          </td>
+                          <td className="text-right">
+                            <div className="d-flex justify-content-end">
+                              <button
+                                className="btn btn-sm btn-light mr-2"
+                                title="Edit"
                                 onClick={() => {
                                   setEditingUser(u);
                                   setIsModalOpen(true);
                                 }}
                               >
-                                <i className="fas fa-pencil-alt m-r-5"></i> Edit
-                              </a>
-                              <a
-                                className="dropdown-item"
+                                <i className="fas fa-pencil-alt text-primary"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm btn-light"
+                                title="Delete"
                                 onClick={() => handleDeactivateUser(u._id)}
-                                data-toggle="modal"
-                                data-target="#delete_user"
                               >
-                                <i className="fas fa-trash-alt m-r-5"></i>{" "}
-                                Delete
-                              </a>
+                                <i className="fas fa-trash-alt text-danger"></i>
+                              </button>
                             </div>
-                          </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No users found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -203,26 +253,7 @@ const UserManagementInterface = () => {
           </div>
         </div>
       </div>
-      <div id="delete_user" className="modal fade delete-modal" role="dialog">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body text-center">
-              <img src="assets/img/sent.png" alt="" width="50" height="46" />
-              <h3 className="delete_class">
-                Are you sure want to delete this User?
-              </h3>
-              <div className="m-t-20">
-                <a href="#" className="btn btn-white" data-dismiss="modal">
-                  Close
-                </a>
-                <button type="submit" className="btn btn-danger">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
       <UserAddEditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

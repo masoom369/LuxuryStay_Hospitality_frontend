@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
-import HotelAddEditModal from "../../components/HotelAddEditModal";
+import RoomAddEditModal from "../../components/RoomAddEditModal";
 
-const HotelManagementInterface = () => {
+const RoomManagementInterface = () => {
   const { user } = useAuth();
+  const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
   const [hotels, setHotels] = useState([]);
-  const [filteredHotels, setFilteredHotels] = useState([]);
-  const [editingHotel, setEditingHotel] = useState(null);
+  const [editingRoom, setEditingRoom] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
-    name: "",
+    hotel: "",
   });
 
   useEffect(() => {
+    fetchRooms();
     fetchHotels();
   }, []);
 
@@ -21,21 +23,33 @@ const HotelManagementInterface = () => {
     try {
       const res = await api.get("/hotels");
       setHotels(res.data.data);
-      setFilteredHotels(res.data.data);
     } catch (err) {
       console.error("Failed to fetch hotels:", err);
     }
   };
 
-  const handleDeactivateHotel = async (id) => {
+  const fetchRooms = async () => {
     try {
       const token = localStorage.getItem("token");
-      await api.delete(`/hotels/${id}`, {
+      const res = await api.get("/rooms", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchHotels();
+      setRooms(res.data.data);
+      setFilteredRooms(res.data.data);
     } catch (err) {
-      console.error("Failed to deactivate hotel:", err);
+      console.error("Failed to fetch rooms:", err);
+    }
+  };
+
+  const handleDeleteRoom = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/rooms/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchRooms();
+    } catch (err) {
+      console.error("Failed to delete room:", err);
     }
   };
 
@@ -45,15 +59,18 @@ const HotelManagementInterface = () => {
   };
 
   const handleSearch = () => {
-    let filtered = hotels;
+    let filtered = rooms;
 
-    if (filters.name) {
-      filtered = filtered.filter((h) =>
-        h.name.toLowerCase().includes(filters.name.toLowerCase())
-      );
+    if (filters.hotel) {
+      filtered = filtered.filter((r) => r.hotel._id === filters.hotel);
     }
 
-    setFilteredHotels(filtered);
+    setFilteredRooms(filtered);
+  };
+
+  const getHotelName = (hotelId) => {
+    const hotel = hotels.find((h) => h._id === hotelId);
+    return hotel ? hotel.name : hotelId;
   };
 
   return (
@@ -62,15 +79,15 @@ const HotelManagementInterface = () => {
         <div className="row align-items-center">
           <div className="col">
             <div className="mt-5">
-              <h4 className="card-title float-left mt-2">Hotel Management</h4>
+              <h4 className="card-title float-left mt-2">Room Management</h4>
               <button
                 onClick={() => {
-                  setEditingHotel(null);
+                  setEditingRoom(null);
                   setIsModalOpen(true);
                 }}
                 className="btn btn-primary float-right veiwbutton"
               >
-                Add Hotel
+                Add Room
               </button>
             </div>
           </div>
@@ -84,14 +101,20 @@ const HotelManagementInterface = () => {
             <div className="row formtype">
               <div className="col-md-3">
                 <div className="form-group">
-                  <label>Hotel Name</label>
-                  <input
-                    type="text"
+                  <label>Hotel</label>
+                  <select
                     className="form-control"
-                    name="name"
-                    value={filters.name}
+                    name="hotel"
+                    value={filters.hotel}
                     onChange={handleFilterChange}
-                  />
+                  >
+                    <option value="">All Hotels</option>
+                    {hotels.map((hotel) => (
+                      <option key={hotel._id} value={hotel._id}>
+                        {hotel.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -121,33 +144,46 @@ const HotelManagementInterface = () => {
                 <table className="datatable table table-stripped">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Location</th>
-                      <th>Contact</th>
-                      <th>Amenities</th>
+                      <th>Room Number</th>
+                      <th>Type</th>
+                      <th>Price per Night</th>
+                      <th>Status</th>
+                      <th>Hotel</th>
+                      <th>Features</th>
                       <th className="text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredHotels.length > 0 ? (
-                      filteredHotels.map((h) => (
-                        <tr key={h._id}>
-                          <td>{h.name}</td>
+                    {filteredRooms.length > 0 ? (
+                      filteredRooms.map((r) => (
+                        <tr key={r._id}>
+                          <td>{r.roomNumber}</td>
+                          <td>{r.type}</td>
+                          <td>${r.pricePerNight}</td>
                           <td>
-                            {h.location?.address}, {h.location?.city}, {h.location?.country}
+                            <span
+                              className={`badge ${
+                                r.status === "available"
+                                  ? "badge-success"
+                                  : r.status === "occupied"
+                                  ? "badge-danger"
+                                  : r.status === "cleaning"
+                                  ? "badge-warning"
+                                  : "badge-secondary"
+                              }`}
+                            >
+                              {r.status}
+                            </span>
                           </td>
-                          <td>
-                            {h.contact?.phone && <div>Phone: {h.contact.phone}</div>}
-                            {h.contact?.email && <div>Email: {h.contact.email}</div>}
-                          </td>
-                          <td>{h.amenities?.join(", ") || "None"}</td>
+                          <td>{getHotelName(r.hotel._id)}</td>
+                          <td>{r.features?.join(", ") || "None"}</td>
                           <td className="text-right">
                             <div className="d-flex justify-content-end">
                               <button
                                 className="btn btn-sm btn-light mr-2"
                                 title="Edit"
                                 onClick={() => {
-                                  setEditingHotel(h);
+                                  setEditingRoom(r);
                                   setIsModalOpen(true);
                                 }}
                               >
@@ -156,7 +192,7 @@ const HotelManagementInterface = () => {
                               <button
                                 className="btn btn-sm btn-light"
                                 title="Delete"
-                                onClick={() => handleDeactivateHotel(h._id)}
+                                onClick={() => handleDeleteRoom(r._id)}
                               >
                                 <i className="fas fa-trash-alt text-danger"></i>
                               </button>
@@ -166,8 +202,8 @@ const HotelManagementInterface = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="text-center">
-                          No hotels found
+                        <td colSpan="7" className="text-center">
+                          No rooms found
                         </td>
                       </tr>
                     )}
@@ -179,14 +215,15 @@ const HotelManagementInterface = () => {
         </div>
       </div>
 
-      <HotelAddEditModal
+      <RoomAddEditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        hotel={editingHotel}
-        onSave={fetchHotels}
+        room={editingRoom}
+        onSave={fetchRooms}
+        hotels={hotels}
       />
     </div>
   );
 };
 
-export default HotelManagementInterface;
+export default RoomManagementInterface;

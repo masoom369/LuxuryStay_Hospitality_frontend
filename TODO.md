@@ -74,3 +74,31 @@ Ensure all pages in `src/pages/public/` and `src/pages/auth/` have consistent th
 ## Followup Steps
 - Run the app to visually inspect changes
 - Make any final adjustments for consistency
+
+# TODO: Prevent index.css from applying to dashboard pages
+
+## Overview
+The index.css file contains Tailwind CSS and custom styles for public pages. Dashboard pages use their own styles via Layout component. To avoid conflicts, load index.css conditionally only for non-dashboard routes.
+
+## Steps to Complete
+
+### 1. Remove Global Import
+- [x] Remove the line `import "./style/index.css";` from frontend/src/App.jsx
+
+### 2. Add Conditional Loading
+- [x] In the ConditionalLayout component in App.jsx, add useEffect to dynamically import index.css only when the current path is not a dashboard route (not starting with /dashboard or /admin)
+
+### 3. Testing and Verification
+- Test dashboard pages to confirm index.css styles do not apply
+- Test public pages to ensure index.css styles still work
+- Check for any style conflicts
+
+## Files to Edit
+- [x] frontend/src/App.jsx
+
+## Dependencies
+- No new dependencies needed
+
+## Followup Steps
+- Run the app to verify changes
+- Make adjustments if needed
