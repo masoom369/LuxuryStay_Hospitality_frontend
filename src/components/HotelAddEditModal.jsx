@@ -19,6 +19,9 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
     },
     amenities: []
   });
+
+  // Keep amenities as text while typing
+  const [amenitiesInput, setAmenitiesInput] = useState('');
   const [isEdit] = useState(!!hotel);
 
   useEffect(() => {
@@ -40,6 +43,7 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
         },
         amenities: hotel.amenities || []
       });
+      setAmenitiesInput((hotel.amenities || []).join(', '));
     } else {
       setFormData({
         name: '',
@@ -58,6 +62,7 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
         },
         amenities: []
       });
+      setAmenitiesInput('');
     }
   }, [hotel]);
 
@@ -69,10 +74,12 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
         ...prev,
         [keys[0]]: {
           ...prev[keys[0]],
-          [keys[1]]: keys[2] ? {
-            ...prev[keys[0]][keys[1]],
-            [keys[2]]: value
-          } : value
+          [keys[1]]: keys[2]
+            ? {
+                ...prev[keys[0]][keys[1]],
+                [keys[2]]: value
+              }
+            : value
         }
       }));
     } else {
@@ -80,24 +87,29 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
     }
   };
 
-  const handleAmenitiesChange = (e) => {
-    const amenities = e.target.value.split(',').map(a => a.trim()).filter(a => a);
-    setFormData({ ...formData, amenities });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
+
+      // ✅ Only split amenities when saving
+      const amenities = amenitiesInput
+        .split(',')
+        .map(a => a.trim())
+        .filter(a => a);
+
+      const payload = { ...formData, amenities };
+
       if (isEdit) {
-        await api.put(`/hotels/${hotel._id}`, formData, {
+        await api.put(`/hotels/${hotel._id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await api.post('/hotels', formData, {
+        await api.post('/hotels', payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
+
       onSave();
       onClose();
     } catch (err) {
@@ -110,13 +122,15 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
   return (
     <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
       <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
+        {/* ✅ Scrollable modal body */}
+        <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="modal-header sticky-top bg-white" style={{ zIndex: 1 }}>
             <h5 className="modal-title">{isEdit ? 'Edit Hotel' : 'Add Hotel'}</h5>
             <button type="button" className="close" onClick={onClose}>
               <span>&times;</span>
             </button>
           </div>
+
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
               <div className="form-group">
@@ -211,18 +225,21 @@ const HotelAddEditModal = ({ isOpen, onClose, hotel, onSave }) => {
                   onChange={handleChange}
                 />
               </div>
+
+              {/* ✅ Fix: user can now type commas freely */}
               <div className="form-group">
                 <label>Amenities (comma-separated)</label>
                 <input
                   type="text"
                   className="form-control"
-                  value={formData.amenities.join(', ')}
-                  onChange={handleAmenitiesChange}
+                  value={amenitiesInput}
+                  onChange={(e) => setAmenitiesInput(e.target.value)}
                   placeholder="e.g., Pool, Spa, Restaurant"
                 />
               </div>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-footer sticky-bottom bg-white" style={{ zIndex: 1 }}>
               <button type="button" className="btn btn-secondary" onClick={onClose}>
                 Cancel
               </button>
