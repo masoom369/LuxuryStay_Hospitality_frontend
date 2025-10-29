@@ -1,32 +1,63 @@
+// src/components/ProtectedRoute.jsx
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { CircularProgress, Box, Typography } from '@mui/material'; // Optional: for loading state
 
-const ProtectedRoute = ({ children, requiredRoles = [] }) => {
-  const { isAuthenticated, hasRole, loading } = useAuth();
-  const location = useLocation();
+/**
+ * ProtectedRoute Component
+ * 
+ * Props:
+ * - allowedRoles: Array of roles allowed to access this route (e.g., ['admin', 'manager'])
+ * - redirectTo: Path to redirect unauthorized users (default: '/login')
+ * - children: Direct child component (alternative to using nested routes)
+ */
+const ProtectedRoute = ({ 
+  allowedRoles = [], 
+  redirectTo = '/login',
+  children 
+}) => {
+  const { user, loading, isGuest, isStaff, isAdmin } = useAuth();
 
-  // Show loading spinner while checking authentication
+  // Show loading spinner while checking auth status
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh' 
+        }}
+      >
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Authenticating...</Typography>
+      </Box>
     );
   }
 
-  // If not authenticated, redirect to login with return URL
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // Redirect to login if not authenticated
+  if (!user) {
+    return <Navigate to={redirectTo} replace />;
   }
 
-  // If roles are required and user doesn't have any of them, redirect to login
-  if (requiredRoles.length > 0 && !requiredRoles.some(role => hasRole(role))) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // If roles are specified, check if user has required role
+  if (allowedRoles.length > 0) {
+    const hasRequiredRole = allowedRoles.some(role => {
+      if (role === 'guest') return isGuest();
+      if (role === 'staff') return isStaff();
+      if (role === 'admin') return isAdmin();
+      return user.role === role;
+    });
+
+    if (!hasRequiredRole) {
+      // Redirect to a forbidden page or home based on your app structure
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
-  // If authenticated and has required roles (or no roles required), render children
-  return children;
+  // Render children if provided, otherwise render nested routes via Outlet
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

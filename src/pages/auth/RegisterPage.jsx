@@ -1,6 +1,6 @@
 // RegisterPage.jsx
 import React, { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context";
 import { Alert } from "../../components";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -13,6 +13,7 @@ const RegisterPage = () => {
     password: ""
   });
   const [alert, setAlert] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,8 +25,12 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await register({ name: formData.name, email: formData.email, password: formData.password });
+    setLoading(true);
+    setAlert(null);
+
+    const result = await register({ name: formData.name, email: formData.email, password: formData.password });
+
+    if (result.success) {
       setAlert({
         type: "success",
         message: "Registration successful! You are now logged in.",
@@ -35,10 +40,12 @@ const RegisterPage = () => {
         email: "",
         password: ""
       });
-      navigate('/dashboard');
-    } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      navigate('/admin/dashboard');
+    } else {
+      setAlert({ type: "error", message: result.message });
     }
+
+    setLoading(false);
   };
 
   const closeAlert = () => setAlert(null);

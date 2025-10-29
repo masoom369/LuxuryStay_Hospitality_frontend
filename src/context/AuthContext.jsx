@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+// src/contexts/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
+// Create the Auth Context
 const AuthContext = createContext();
 
+// Custom hook to use the Auth Context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -11,212 +14,131 @@ export const useAuth = () => {
   return context;
 };
 
+// Auth Provider Component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('authToken'));
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  // Configure axios defaults
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  }, [token]);
+
+  // Check authentication on initial load
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get('/api/auth/profile'); // You'll need to create this endpoint
+        setUser(response.data.user);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [token]);
 
   // Login function
   const login = async (email, password) => {
-    setLoading(true);
-    setError(null);
     try {
-      const res = await api.post('/users/login', { email, password });
-      const { token: newToken, user: userData } = res.data;
-      const userWithId = { _id: userData.id, name: userData.name, email: userData.email, assignments: userData.assignments };
-      setUser(userWithId);
-      setToken(newToken);
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(userWithId));
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      return userWithId;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-      throw err;
-    } finally {
-      setLoading(false);
+      const response = await axios.post('/api/auth/login', { email, password });
+      const { token, user } = response.data.data;
+      
+      setToken(token);
+      setUser(user);
+      localStorage.setItem('authToken', token);
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed';
+      return { success: false, message };
     }
   };
 
   // Register function
   const register = async (userData) => {
-    setLoading(true);
-    setError(null);
     try {
-      const res = await api.post('/users/register', userData);
-      const { token: newToken, user: newUser } = res.data;
-      const userWithId = { _id: newUser.id, name: newUser.name, email: newUser.email, assignments: newUser.assignments };
-      setUser(userWithId);
-      setToken(newToken);
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(userWithId));
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      return userWithId;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
-      throw err;
-    } finally {
-      setLoading(false);
+      const response = await axios.post('/api/auth/register', userData);
+      const { token, user } = response.data.data;
+      
+      setToken(token);
+      setUser(user);
+      localStorage.setItem('authToken', token);
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed';
+      return { success: false, message };
     }
   };
 
   // Logout function
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete api.defaults.headers.common['Authorization'];
-    setError(null);
-    setLoading(false);
-  };
+    localStorage.removeItem('authToken');
+    delete axios.defaults.headers.common['Authorization'];
+  }, []);
 
-  // Get current user profile
-  const getProfile = async () => {
-    const currentToken = localStorage.getItem('token');
-    if (!currentToken) return null;
-
-    setLoading(true);
-    setError(null);
+  // Change password function
+  const changePassword = async (oldPassword, newPassword) => {
     try {
-      api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
-      const res = await api.get(`/users/${user?._id}`);
-      setUser(res.data.data);
-      return res.data.data;
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      // If token is invalid, logout
-      if (err.response?.status === 401) {
-        logout();
-      } else {
-        // For non-401 errors, don't logout, just set error
-        setError(err.response?.data?.message || err.message);
-      }
-      throw err;
-    } finally {
-      setLoading(false);
+      await axios.post('/api/auth/change-password', { oldPassword, newPassword });
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Password change failed';
+      return { success: false, message };
     }
   };
 
-  // Update profile
-  const updateProfile = async (profileData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.put(`/users/${user._id}`, profileData);
-      setUser(res.data.data);
-      return res.data.data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Update failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Change password
-  const changePassword = async (currentPassword, newPassword) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await api.put('/users/change-password', { currentPassword, newPassword });
-      return true;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Change password failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Forgot password
-  const forgotPassword = async (email) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await api.post('/users/forgot-password', { email });
-      return true;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Forgot password failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Reset password
-  const resetPassword = async (resetToken, newPassword) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await api.post('/users/reset-password', { token: resetToken, newPassword });
-      return true;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Reset password failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    return !!user && !!token;
-  };
-
-  // Check if user has specific role
+  // Check user roles
   const hasRole = (role) => {
-    return user && user.assignments?.some(a => a.role === role);
+    return user?.role === role;
   };
 
-  // Auto-login on app start
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = localStorage.getItem('token');
-      
-      if (storedToken) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-        try {
-          await getProfile();
-        } catch (err) {
-          // Token might be expired, logout
-          logout();
-        }
-      } else {
-        setLoading(false);
-      }
-    };
+  const isGuest = () => {
+    return user?.role === 'guest';
+  };
 
-    initializeAuth();
-  }, []); // Empty dependency array is fine now
+  const isStaff = () => {
+    return ['admin', 'subadmin', 'manager', 'receptionist', 'housekeeping', 'maintenance'].includes(user?.role);
+  };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
+  // Context value
   const value = {
     user,
     token,
     loading,
-    error,
     login,
     register,
     logout,
-    getProfile,
-    updateProfile,
     changePassword,
-    forgotPassword,
-    resetPassword,
-    isAuthenticated,
     hasRole,
-    setError,
+    isGuest,
+    isStaff,
+    isAdmin
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

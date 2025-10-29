@@ -30,6 +30,9 @@ export default function PrivacyPolicyPage() {
       {/* Content Section */}
       <div className="container mx-auto py-14 px-4">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden p-8">
+          <h2 className="text-3xl font-primary text-center mb-6">
+            Privacy Policy
+          </h2>
           <div className="max-w-4xl mx-auto">
             <PolicySection title="Our Commitment">
               <p>

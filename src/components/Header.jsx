@@ -1,9 +1,8 @@
-import { useRoomContext } from '../context';
+import { useRoomContext, useAuth } from '../context';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoWhite } from '../assets'; // SVG Logo
 import { LogoDark } from '../assets'; // SVG Logo
-import { useAuth } from '../context/AuthContext';
 
 
 const Header = () => {

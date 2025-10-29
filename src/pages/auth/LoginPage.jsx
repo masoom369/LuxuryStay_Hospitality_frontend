@@ -1,6 +1,6 @@
 // LoginPage.jsx
 import React, { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context";
 import { Alert } from "../../components";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -12,6 +12,7 @@ const LoginPage = () => {
     password: ""
   });
   const [alert, setAlert] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,13 +24,19 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await login(formData.email, formData.password);
+    setLoading(true);
+    setAlert(null);
+
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
       setAlert({ type: "success", message: "Login successful!" });
-      navigate('/dashboard');
-    } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      navigate('/admin/dashboard');
+    } else {
+      setAlert({ type: "error", message: result.message });
     }
+
+    setLoading(false);
   };
 
   const closeAlert = () => setAlert(null);
