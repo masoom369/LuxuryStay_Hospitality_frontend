@@ -8,7 +8,7 @@ const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: ""
   });
@@ -28,7 +28,7 @@ const RegisterPage = () => {
     setLoading(true);
     setAlert(null);
 
-    const result = await register({ name: formData.name, email: formData.email, password: formData.password });
+    const result = await register({ username: formData.username, email: formData.email, password: formData.password });
 
     if (result.success) {
       setAlert({
@@ -36,7 +36,7 @@ const RegisterPage = () => {
         message: "Registration successful! You are now logged in.",
       });
       setFormData({
-        name: "",
+        username: "",
         email: "",
         password: ""
       });
@@ -83,15 +83,15 @@ const RegisterPage = () => {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="name"
+                  htmlFor="username"
                 >
-                  Name:
+                  Username:
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="username"
+                  name="username"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
