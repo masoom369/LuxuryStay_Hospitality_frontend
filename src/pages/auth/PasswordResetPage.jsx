@@ -5,11 +5,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const PasswordResetPage = () => {
-  const { forgotPassword } = useAuth();
+  const { forgotPassword, loading, error, setError } = useAuth();
   const [formData, setFormData] = useState({
     email: ""
   });
-  const [alert, setAlert] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,22 +20,16 @@ const PasswordResetPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await forgotPassword(formData.email);
-      setAlert({
-        type: "success",
-        message: "Password reset link sent to your email!",
-      });
+    setError(null);
+
+    const result = await forgotPassword(formData.email);
+
+    if (result.success) {
       setFormData({ email: "" });
-    } catch (error) {
-      setAlert({
-        type: "error",
-        message: error.message || "Failed to send reset link. Please try again.",
-      });
     }
   };
 
-  const closeAlert = () => setAlert(null);
+  const closeAlert = () => setError(null);
 
   return (
     <section>
@@ -53,12 +46,11 @@ const PasswordResetPage = () => {
       <div className="container mx-auto py-14">
         <div className="flex justify-center">
           <div className="w-full max-w-md">
-            {alert && (
+            {error && (
               <Alert
-                type={alert.type}
-                message={alert.message}
+                type="error"
+                message={error}
                 onClose={closeAlert}
-                autoClose={alert.type === "success"}
               />
             )}
             <form

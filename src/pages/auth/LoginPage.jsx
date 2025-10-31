@@ -5,14 +5,12 @@ import { Alert } from "../../components";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, loading, error, setError } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
-  const [alert, setAlert] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,22 +22,16 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setAlert(null);
+    setError(null);
 
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      setAlert({ type: "success", message: "Login successful!" });
-      navigate('/admin/dashboard');
-    } else {
-      setAlert({ type: "error", message: result.message });
+      navigate('/');
     }
-
-    setLoading(false);
   };
 
-  const closeAlert = () => setAlert(null);
+  const closeAlert = () => setError(null);
 
   return (
     <section>
@@ -56,12 +48,11 @@ const LoginPage = () => {
       <div className="container mx-auto py-14">
         <div className="flex justify-center">
           <div className="w-full max-w-md">
-            {alert && (
+            {error && (
               <Alert
-                type={alert.type}
-                message={alert.message}
+                type="error"
+                message={error}
                 onClose={closeAlert}
-                autoClose={alert.type === "success"}
               />
             )}
             <form
