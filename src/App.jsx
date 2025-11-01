@@ -1,5 +1,8 @@
+import AdminAccount from "./pages/admin/AdminAccount";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PageNotFound } from "./components";
+
+// Pages (Public)
 import {
   HomePage,
   RoomDetails,
@@ -13,36 +16,50 @@ import {
   PrivacyPolicyPage,
   RoomDetailsPage,
 } from "./pages";
+
+// Pages (Admin)
+import HotelManagement from "./pages/admin/HotelManagement";
+import RoomsManagement from "./pages/admin/RoomsManagement";
+import UserManagement from "./pages/admin/UserManagement";
+
+// Layouts
 import PublicLayout from "./layouts/PublicLayout";
-import DashboardLayout from "./layouts/DashboardLayout";
+import AdminLayout from "./layouts/AdminLayout";
 
 const App = () => {
   return (
     <main className="">
       <BrowserRouter>
-        <PublicLayout>
-          <Routes>
-            {/* Public Routes */}
-            <Route path={"/"} element={<HomePage />} />
-            <Route path={"/room/:id"} element={<RoomDetails />} />
-            <Route path={"/about-us"} element={<AboutUsPage />} />
-            <Route path={"/contact-us"} element={<ContactUsPage />} />
-            <Route path={"/faq"} element={<FAQPage />} />
-            <Route path={"/privacy-policy"} element={<PrivacyPolicyPage />} />
-            <Route path={"/room-details/:id"} element={<RoomDetailsPage />} />
+        <Routes>
 
-            {/* Auth Routes */}
-            <Route path={"/login"} element={<LoginPage />} />
-            <Route path={"/register"} element={<RegisterPage />} />
-            <Route path={"/password-reset"} element={<PasswordResetPage />} />
+          {/* Public Layout */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/room/:id" element={<RoomDetails />} />
+            <Route path="/room-details/:id" element={<RoomDetailsPage />} />
+            <Route path="/about-us" element={<AboutUsPage />} />
+            <Route path="/contact-us" element={<ContactUsPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/password-reset" element={<PasswordResetPage />} />
+          </Route>
 
-            {/* Dashboard Routes */}
-            <Route path={"/admin/dashboard"} element={<Dashboard />} />
+          {/* Admin Layout */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="hotels" element={<HotelManagement />} />
+            <Route path="rooms" element={<RoomsManagement />} />
+            <Route path="account" element={<AdminAccount />} />
 
-            {/* 404 */}
-            <Route path={"*"} element={<PageNotFound />} />
-          </Routes>
-        </PublicLayout>
+          </Route>
+
+          {/* 404 Page */}
+          <Route path="*" element={<PageNotFound />} />
+
+        </Routes>
       </BrowserRouter>
     </main>
   );
