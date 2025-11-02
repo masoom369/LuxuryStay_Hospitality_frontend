@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRoomContext, useAuth } from '../context';
+import { useRoomContext, useAuth } from '../../context';
 import { Link, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {

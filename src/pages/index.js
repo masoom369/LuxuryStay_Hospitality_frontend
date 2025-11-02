@@ -1,6 +1,6 @@
 export { default as RoomDetails } from './RoomDetails';
 export { default as Home } from './Home';
-export { default as Dashboard } from './Dashboard';
+export { default as Dashboard } from './admin/Dashboard';
 
 // Auth pages
 export { default as LoginPage } from './auth/LoginPage';
