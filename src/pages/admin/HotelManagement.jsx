@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Edit, Trash } from "lucide-react";
+import AddEditModal from "../../components/admin/AddEditModal";
 
 const HotelManagement = () => {
   const [hotels, setHotels] = useState([
@@ -7,26 +8,29 @@ const HotelManagement = () => {
     { id: 2, name: "Luxury Stay", location: "Lahore", rating: 4 },
   ]);
 
-  const [newHotel, setNewHotel] = useState({ name: "", location: "", rating: "" });
-  const [editingId, setEditingId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingHotel, setEditingHotel] = useState(null);
 
-  const handleAddOrUpdate = () => {
-    if (!newHotel.name || !newHotel.location || !newHotel.rating) return alert("All fields required!");
+  const fields = [
+    { name: "name", type: "text", placeholder: "Hotel Name" },
+    { name: "location", type: "text", placeholder: "Location" },
+    { name: "rating", type: "number", placeholder: "Rating (1-5)" },
+  ];
 
-    if (editingId) {
+  const handleAddOrUpdate = (data) => {
+    if (editingHotel) {
       setHotels((prev) =>
-        prev.map((h) => (h.id === editingId ? { ...newHotel, id: editingId } : h))
+        prev.map((h) => (h.id === editingHotel.id ? { ...data, id: editingHotel.id } : h))
       );
-      setEditingId(null);
+      setEditingHotel(null);
     } else {
-      setHotels((prev) => [...prev, { ...newHotel, id: Date.now() }]);
+      setHotels((prev) => [...prev, { ...data, id: Date.now() }]);
     }
-    setNewHotel({ name: "", location: "", rating: "" });
   };
 
   const handleEdit = (hotel) => {
-    setNewHotel(hotel);
-    setEditingId(hotel.id);
+    setEditingHotel(hotel);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -35,40 +39,21 @@ const HotelManagement = () => {
     }
   };
 
+  const openAddModal = () => {
+    setEditingHotel(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-[#3b2a1a]">🏨 Hotel Management</h2>
-
-      {/* Add / Edit Form */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Hotel Name"
-            value={newHotel.name}
-            onChange={(e) => setNewHotel({ ...newHotel, name: e.target.value })}
-            className="border rounded p-2"
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            value={newHotel.location}
-            onChange={(e) => setNewHotel({ ...newHotel, location: e.target.value })}
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            placeholder="Rating (1-5)"
-            value={newHotel.rating}
-            onChange={(e) => setNewHotel({ ...newHotel, rating: e.target.value })}
-            className="border rounded p-2"
-          />
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-[#3b2a1a]">🏨 Hotel Management</h2>
         <button
-          onClick={handleAddOrUpdate}
-          className="mt-4 bg-[#5a422d] text-white px-4 py-2 rounded hover:bg-[#3b2a1a]"
+          onClick={openAddModal}
+          className="bg-[#5a422d] text-white px-4 py-2 rounded hover:bg-[#3b2a1a] flex items-center gap-2"
         >
-          {editingId ? "Update Hotel" : "Add Hotel"}
+          <Plus size={16} />
+          Add Hotel
         </button>
       </div>
 
@@ -107,6 +92,15 @@ const HotelManagement = () => {
           )}
         </tbody>
       </table>
+
+      <AddEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingHotel ? "Edit Hotel" : "Add Hotel"}
+        fields={fields}
+        initialData={editingHotel}
+        onSubmit={handleAddOrUpdate}
+      />
     </div>
   );
 };

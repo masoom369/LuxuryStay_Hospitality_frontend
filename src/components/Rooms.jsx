@@ -1,23 +1,17 @@
-import { useRoomContext } from '../context';
 import { SpinnerDotted } from 'spinners-react';
 import { Room } from '.';
 
-
-const Rooms = () => {
-
-  const { rooms, loading } = useRoomContext();
-
+const Rooms = ({ rooms, loading }) => {
   return (
     <section className='py-24'>
 
       {
-        // overlay & spinner effect 
+        // overlay & spinner effect
         loading &&
         <div className='h-screen w-full fixed bottom-0 top-0 bg-black/80 z-50 grid place-items-center'>
           <SpinnerDotted />
         </div>
       }
-
 
       <div className='container mx-auto lg:px-0'>
 

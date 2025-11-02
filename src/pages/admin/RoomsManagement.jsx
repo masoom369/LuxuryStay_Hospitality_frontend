@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Edit, Trash } from "lucide-react";
+import AddEditModal from "../../components/admin/AddEditModal";
 
 const RoomsManagement = () => {
   const [rooms, setRooms] = useState([
@@ -7,27 +8,29 @@ const RoomsManagement = () => {
     { id: 2, roomNumber: "202", type: "Suite", price: 25000 },
   ]);
 
-  const [newRoom, setNewRoom] = useState({ roomNumber: "", type: "", price: "" });
-  const [editingId, setEditingId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState(null);
 
-  const handleAddOrUpdate = () => {
-    if (!newRoom.roomNumber || !newRoom.type || !newRoom.price)
-      return alert("All fields required!");
+  const fields = [
+    { name: "roomNumber", type: "text", placeholder: "Room Number" },
+    { name: "type", type: "text", placeholder: "Room Type" },
+    { name: "price", type: "number", placeholder: "Price" },
+  ];
 
-    if (editingId) {
+  const handleAddOrUpdate = (data) => {
+    if (editingRoom) {
       setRooms((prev) =>
-        prev.map((r) => (r.id === editingId ? { ...newRoom, id: editingId } : r))
+        prev.map((r) => (r.id === editingRoom.id ? { ...data, id: editingRoom.id } : r))
       );
-      setEditingId(null);
+      setEditingRoom(null);
     } else {
-      setRooms((prev) => [...prev, { ...newRoom, id: Date.now() }]);
+      setRooms((prev) => [...prev, { ...data, id: Date.now() }]);
     }
-    setNewRoom({ roomNumber: "", type: "", price: "" });
   };
 
   const handleEdit = (room) => {
-    setNewRoom(room);
-    setEditingId(room.id);
+    setEditingRoom(room);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -36,40 +39,21 @@ const RoomsManagement = () => {
     }
   };
 
+  const openAddModal = () => {
+    setEditingRoom(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-[#3b2a1a]">🛏️ Rooms Management</h2>
-
-      {/* Add / Edit Form */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Room Number"
-            value={newRoom.roomNumber}
-            onChange={(e) => setNewRoom({ ...newRoom, roomNumber: e.target.value })}
-            className="border rounded p-2"
-          />
-          <input
-            type="text"
-            placeholder="Room Type"
-            value={newRoom.type}
-            onChange={(e) => setNewRoom({ ...newRoom, type: e.target.value })}
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            placeholder="Price"
-            value={newRoom.price}
-            onChange={(e) => setNewRoom({ ...newRoom, price: e.target.value })}
-            className="border rounded p-2"
-          />
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-[#3b2a1a]">🛏️ Rooms Management</h2>
         <button
-          onClick={handleAddOrUpdate}
-          className="mt-4 bg-[#5a422d] text-white px-4 py-2 rounded hover:bg-[#3b2a1a]"
+          onClick={openAddModal}
+          className="bg-[#5a422d] text-white px-4 py-2 rounded hover:bg-[#3b2a1a] flex items-center gap-2"
         >
-          {editingId ? "Update Room" : "Add Room"}
+          <Plus size={16} />
+          Add Room
         </button>
       </div>
 
@@ -108,6 +92,15 @@ const RoomsManagement = () => {
           )}
         </tbody>
       </table>
+
+      <AddEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingRoom ? "Edit Room" : "Add Room"}
+        fields={fields}
+        initialData={editingRoom}
+        onSubmit={handleAddOrUpdate}
+      />
     </div>
   );
 };

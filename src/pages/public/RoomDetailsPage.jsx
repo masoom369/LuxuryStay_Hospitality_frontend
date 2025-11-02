@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   AdultsDropdown,
   CheckIn,
@@ -5,22 +6,40 @@ import {
   KidsDropdown,
   ScrollToTop,
 } from "../../components";
-import { useRoomContext } from "../../context";
 import { hotelRules } from "../../constants/data";
 import { useParams } from "react-router-dom";
 import { FaCheck } from "react-icons/fa";
+import api from "../../services/api";
 
-const RoomDetails = () => {
+const RoomDetailsPage = () => {
   const { id } = useParams(); // id get form url (/room/:id) as string...
-  const { rooms } = useRoomContext();
+  const [room, setRoom] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const room = rooms.find((room) => room.id === +id);
+  useEffect(() => {
+    const fetchRoom = async () => {
+      try {
+        const response = await api.get(`/rooms/${id}`);
+        setRoom(response.data.data);
+      } catch (error) {
+        console.error("Error fetching room:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // for (const key in room) {
-  //   console.log(key);
-  // }
+    fetchRoom();
+  }, [id]);
 
-  const { name, description, facilities, price, imageLg } = room ?? {};
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!room) {
+    return <div>Room not found</div>;
+  }
+
+  const { name, description, facilities, price, imageLg } = room;
 
   return (
     <section>
@@ -116,4 +135,4 @@ const RoomDetails = () => {
   );
 };
 
-export default RoomDetails;
+export default RoomDetailsPage;

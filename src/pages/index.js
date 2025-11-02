@@ -1,7 +1,3 @@
-export { default as RoomDetails } from './RoomDetails';
-export { default as Home } from './Home';
-export { default as Dashboard } from './Dashboard';
-
 // Auth pages
 export { default as LoginPage } from './auth/LoginPage';
 export { default as RegisterPage } from './auth/RegisterPage';
@@ -14,3 +10,9 @@ export { default as FAQPage } from './public/FAQPage';
 export { default as PrivacyPolicyPage } from './public/PrivacyPolicyPage';
 export { default as RoomDetailsPage } from './public/RoomDetailsPage';
 export { default as HomePage } from './public/HomePage';
+export { default as Dashboard } from './shared/dashboard';
+// // dashboard pages
+// export { default as DashboardHomePage } from './dashboard/DashboardHomePage';
+// export { default as UserProfilePage } from './dashboard/UserProfilePage';
+// export { default as BookingsPage } from './dashboard/BookingsPage';
+// export { default as SettingsPage } from './dashboard/SettingsPage';

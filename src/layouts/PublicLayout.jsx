@@ -1,10 +1,13 @@
 import { Header, Footer } from '../components';
+import { Outlet } from 'react-router-dom';
 
-const PublicLayout = ({ children }) => {
+const PublicLayout = () => {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main>
+        <Outlet />  {/* This is where your nested routes (Home, About, etc.) show up */}
+      </main>
       <Footer />
     </>
   );

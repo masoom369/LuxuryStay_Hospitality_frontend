@@ -1,23 +1,15 @@
-import { useRoomContext } from '../context';
 import { BsChevronDown } from 'react-icons/bs';
 import { adultsList } from '../constants/data';
 import { Menu } from '@headlessui/react';
 
-
-const AdultsDropdown = () => {
-
-  const { adults, setAdults, } = useRoomContext();
-
-
+const AdultsDropdown = ({ adults, setAdults }) => {
   return (
     <Menu as='div' className='w-full h-full bg-white relative'>
-
 
       <Menu.Button className='w-full h-full flex items-center justify-between px-8'>
         {adults}
         <BsChevronDown className='text-base text-accent-hover' />
       </Menu.Button>
-
 
       <Menu.Items as='ul' className='bg-white absolute w-full flex flex-col z-40'>
         {
@@ -33,7 +25,6 @@ const AdultsDropdown = () => {
           )
         }
       </Menu.Items>
-
 
     </Menu>
   );

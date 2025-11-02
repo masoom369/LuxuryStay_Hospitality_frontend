@@ -1,11 +1,9 @@
+import { useState } from 'react';
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '.';
-import { useRoomContext } from '../context';
 
-
-const BookForm = () => {
-
-  const { handleCheck } = useRoomContext();
-
+const BookForm = ({ handleCheck }) => {
+  const [adults, setAdults] = useState('1 Adult');
+  const [kids, setKids] = useState('0 Kid');
 
   return (
     <form className='h-[300px] lg:h-[70px] w-full'>
@@ -20,11 +18,11 @@ const BookForm = () => {
         </div>
 
         <div className='flex-1 border-r'>
-          <AdultsDropdown />
+          <AdultsDropdown adults={adults} setAdults={setAdults} />
         </div>
 
         <div className='flex-1 border-r'>
-          <KidsDropdown />
+          <KidsDropdown kids={kids} setKids={setKids} />
         </div>
 
         <button

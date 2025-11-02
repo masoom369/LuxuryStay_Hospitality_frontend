@@ -5,7 +5,6 @@ import { PageNotFound } from "./components";
 // Pages (Public)
 import {
   HomePage,
-  RoomDetails,
   Dashboard,
   LoginPage,
   RegisterPage,
@@ -24,19 +23,17 @@ import UserManagement from "./pages/admin/UserManagement";
 
 // Layouts
 import PublicLayout from "./layouts/PublicLayout";
-import AdminLayout from "./layouts/AdminLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 
 const App = () => {
   return (
     <main className="">
       <BrowserRouter>
         <Routes>
-
           {/* Public Layout */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/room/:id" element={<RoomDetails />} />
-            <Route path="/room-details/:id" element={<RoomDetailsPage />} />
+            <Route path="/room/:id" element={<RoomDetailsPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/faq" element={<FAQPage />} />
@@ -46,19 +43,17 @@ const App = () => {
             <Route path="/password-reset" element={<PasswordResetPage />} />
           </Route>
 
-          {/* Admin Layout */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="users" element={<UserManagement />} />
+          {/* Dashboard Layout */}
+          <Route path="/admin" element={<DashboardLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+             <Route path="users" element={<UserManagement />} />
             <Route path="hotels" element={<HotelManagement />} />
             <Route path="rooms" element={<RoomsManagement />} />
             <Route path="account" element={<AdminAccount />} />
-
           </Route>
 
           {/* 404 Page */}
           <Route path="*" element={<PageNotFound />} />
-
         </Routes>
       </BrowserRouter>
     </main>
