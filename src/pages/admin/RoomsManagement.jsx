@@ -45,62 +45,63 @@ const RoomsManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-[#3b2a1a]">🛏️ Rooms Management</h2>
-        <button
-          onClick={openAddModal}
-          className="bg-[#5a422d] text-white px-4 py-2 rounded hover:bg-[#3b2a1a] flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add Room
-        </button>
-      </div>
+    <div className="container mx-auto py-14 px-4">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-primary text-accent px-3">Rooms Management</h2>
+          <button
+            onClick={openAddModal}
+            className="bg-accent text-white hover:bg-accent/90 transition-colors py-3 px-8 rounded-md tracking-widest"
+          >
+            Add Room
+          </button>
+        </div>
 
-      {/* Room List */}
-      <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
-        <thead className="bg-[#5a422d] text-white">
-          <tr>
-            <th className="p-3 text-left">Room No.</th>
-            <th className="p-3 text-left">Type</th>
-            <th className="p-3 text-left">Price</th>
-            <th className="p-3 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rooms.map((room) => (
-            <tr key={room.id} className="border-b">
-              <td className="p-3">{room.roomNumber}</td>
-              <td className="p-3">{room.type}</td>
-              <td className="p-3">{room.price}</td>
-              <td className="p-3 text-center flex justify-center gap-2">
-                <button onClick={() => handleEdit(room)} className="text-blue-600 hover:underline">
-                  <Edit size={16} />
-                </button>
-                <button onClick={() => handleDelete(room.id)} className="text-red-600 hover:underline">
-                  <Trash size={16} />
-                </button>
-              </td>
-            </tr>
-          ))}
-          {rooms.length === 0 && (
+        {/* Room List */}
+        <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
+          <thead className="bg-accent text-white">
             <tr>
-              <td colSpan="4" className="text-center py-4 text-gray-500">
-                No rooms found.
-              </td>
+              <th className="p-3 text-left font-primary">Room No.</th>
+              <th className="p-3 text-left font-primary">Type</th>
+              <th className="p-3 text-left font-primary">Price</th>
+              <th className="p-3 text-center font-primary">Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rooms.map((room) => (
+              <tr key={room.id} className="border-b">
+                <td className="p-3 font-secondary">{room.roomNumber}</td>
+                <td className="p-3 font-secondary">{room.type}</td>
+                <td className="p-3 font-secondary">{room.price}</td>
+                <td className="p-3 text-center flex justify-center gap-2">
+                  <button onClick={() => handleEdit(room)} className="text-accent hover:underline">
+                    <Edit size={16} />
+                  </button>
+                  <button onClick={() => handleDelete(room.id)} className="text-red-600 hover:underline">
+                    <Trash size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {rooms.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-4 text-gray-500 font-secondary">
+                  No rooms found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-      <AddEditModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingRoom ? "Edit Room" : "Add Room"}
-        fields={fields}
-        initialData={editingRoom}
-        onSubmit={handleAddOrUpdate}
-      />
+        <AddEditModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={editingRoom ? "Edit Room" : "Add Room"}
+          fields={fields}
+          initialData={editingRoom}
+          onSubmit={handleAddOrUpdate}
+        />
+      </div>
     </div>
   );
 };

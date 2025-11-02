@@ -51,7 +51,7 @@ const AddEditModal = ({ isOpen, onClose, title, fields, initialData, onSubmit })
                   value={formData[field.name] || ""}
                   onChange={handleChange}
                   placeholder={field.placeholder}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5a422d] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                   required
                 />
               </div>
@@ -67,7 +67,7 @@ const AddEditModal = ({ isOpen, onClose, title, fields, initialData, onSubmit })
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-[#5a422d] text-white rounded hover:bg-[#3b2a1a]"
+              className="px-4 py-2 bg-accent text-white rounded hover:bg-accent-hover"
             >
               {initialData ? "Update" : "Add"}
             </button>

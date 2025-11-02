@@ -19,7 +19,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
       >
         <div className={`${sidebarOpen ? 'block' : 'hidden'} h-full flex flex-col w-64`}>
           <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="font-bold text-lg text-gray-800">Hotel Adina</h2>
+            <h2 className="font-primary text-lg text-accent">Hotel Adina</h2>
           </div>
 
           <nav className="flex-1 mt-6 px-3">
@@ -27,46 +27,46 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
               <li>
                 <Link
                   to="/admin/dashboard"
-                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
                   <BsGraphUp className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">Dashboard</span>
+                  <span>Dashboard</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/admin/users"
-                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
                   <BsPeople className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">User Management</span>
+                  <span>User Management</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/admin/hotels"
-                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
                   <BsBuilding className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">Hotel Management</span>
+                  <span>Hotel Management</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/admin/rooms"
-                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
                   <BsHouseDoor className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">Rooms Management</span>
+                  <span>Rooms Management</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/"
-                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
                   <BsDoorOpen className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">Public Site</span>
+                  <span>Public Site</span>
                 </Link>
               </li>
               <li>
@@ -75,10 +75,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                     logout();
                     navigate('/admin/dashboard');
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors font-secondary"
                 >
                   <BsBoxArrowRight className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">Logout</span>
+                  <span>Logout</span>
                 </button>
               </li>
             </ul>

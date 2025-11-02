@@ -29,7 +29,7 @@ const DashboardLayout = ({ children }) => {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} logout={logout} />
       <div className="flex-1 flex flex-col w-full">
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} logout={logout} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full mb-12"><Outlet /></main>
+        <main className="flex-1 w-full"><Outlet /></main>
         <Footer />
       </div>
     </div>
