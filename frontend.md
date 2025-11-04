@@ -192,7 +192,7 @@ npm run dev
 ### 6. **Project Dependencies Used**
 ```bash
 npm create vite
-npm add -D react-icons
+npm add -D lucide-react
 npm add -D react-router-dom
 npm add -D react-datepicker
 npm add -D @headlessui/react

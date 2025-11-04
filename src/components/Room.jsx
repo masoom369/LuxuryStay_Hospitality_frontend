@@ -1,4 +1,4 @@
-import { BsArrowsFullscreen, BsPeople } from 'react-icons/bs';
+import { Maximize, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Room = ({ room }) => {
@@ -19,7 +19,7 @@ const Room = ({ room }) => {
 
           <div className='flex items-center gap-x-2'>
             <div className='text-accent'>
-              <BsArrowsFullscreen className='text-[15px]' />
+              <Maximize className='text-[15px]' />
             </div>
             <div className='flex gap-x-1'>
               <div>Size</div>
@@ -29,7 +29,7 @@ const Room = ({ room }) => {
 
           <div className='flex items-center gap-x-2'>
             <div className='text-accent'>
-              <BsPeople className='text-[18px]' />
+              <Users className='text-[18px]' />
             </div>
             <div className='flex gap-x-1'>
               <div>Max people</div>

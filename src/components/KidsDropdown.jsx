@@ -1,4 +1,4 @@
-import { BsChevronDown } from 'react-icons/bs';
+import { ChevronDown } from 'lucide-react';
 import { kidsList } from '../constants/data';
 import { Menu } from '@headlessui/react';
 
@@ -8,7 +8,7 @@ const KidsDropdown = ({ kids, setKids }) => {
 
       <Menu.Button className='w-full h-full flex items-center justify-between px-8'>
         {kids === '0 Kid' ? 'No Kid' : kids}
-        <BsChevronDown className='text-base text-accent-hover' />
+        <ChevronDown className='text-base text-accent-hover' />
       </Menu.Button>
 
       <Menu.Items as='ul' className='bg-white absolute w-full flex flex-col z-40'>

@@ -1,4 +1,4 @@
-import { FaCheck } from "react-icons/fa";
+import { Check } from "lucide-react";
 import images from "../assets";
 
 

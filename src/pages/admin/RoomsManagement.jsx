@@ -1,30 +1,102 @@
-import { useState } from "react";
-import { Plus, Edit, Trash } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash, Eye } from "lucide-react";
 import AddEditModal from "../../components/admin/AddEditModal";
+import ShowModal from "../../components/admin/ShowModal";
+import DataTable from "../../components/DataTable";
+import FilterTable from "../../components/FilterTable";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+import api from "../../services/api";
 
 const RoomsManagement = () => {
-  const [rooms, setRooms] = useState([
-    { id: 1, roomNumber: "101", type: "Deluxe", price: 15000 },
-    { id: 2, roomNumber: "202", type: "Suite", price: 25000 },
-  ]);
-
+  const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  const [showModalOpen, setShowModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState(null);
 
   const fields = [
     { name: "roomNumber", type: "text", placeholder: "Room Number" },
-    { name: "type", type: "text", placeholder: "Room Type" },
-    { name: "price", type: "number", placeholder: "Price" },
+    { name: "type", type: "select", placeholder: "Room Type", options: ["Standard", "Deluxe", "Suite", "Executive", "Presidential"] },
+    { name: "capacity", type: "number", placeholder: "Capacity" },
+    { name: "price", type: "number", placeholder: "Price per night" },
+    { name: "description", type: "textarea", placeholder: "Description" },
+    { name: "amenities", type: "text", placeholder: "Amenities (comma-separated)" },
+    { name: "status", type: "select", placeholder: "Status", options: ["available", "occupied", "maintenance", "cleaning"] },
+    { name: "images", type: "file", placeholder: "Images", multiple: true },
   ];
 
-  const handleAddOrUpdate = (data) => {
-    if (editingRoom) {
-      setRooms((prev) =>
-        prev.map((r) => (r.id === editingRoom.id ? { ...data, id: editingRoom.id } : r))
-      );
-      setEditingRoom(null);
+  // Fetch rooms from API
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/rooms');
+      setRooms(response.data.data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch rooms');
+      console.error('Error fetching rooms:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    setFilteredRooms(rooms);
+  }, [rooms]);
+
+  const handleFilter = (query) => {
+    if (query) {
+      setFilteredRooms(rooms.filter(room => room.roomNumber.toLowerCase().includes(query.toLowerCase())));
     } else {
-      setRooms((prev) => [...prev, { ...data, id: Date.now() }]);
+      setFilteredRooms(rooms);
+    }
+  };
+
+  const handleAddOrUpdate = async (data) => {
+    try {
+      const formData = new FormData();
+
+      // Handle nested objects and arrays
+      Object.keys(data).forEach(key => {
+        if (key === 'images' && data[key]) {
+          // Handle file uploads
+          if (Array.isArray(data[key])) {
+            data[key].forEach(file => formData.append('images', file));
+          }
+        } else if (key === 'amenities' && typeof data[key] === 'string') {
+          formData.append(key, JSON.stringify(data[key].split(',').map(a => a.trim())));
+        } else {
+          formData.append(key, data[key]);
+        }
+      });
+
+      if (editingRoom) {
+        // Update existing room
+        await api.put(`/rooms/${editingRoom._id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        await fetchRooms(); // Refresh the list
+        setEditingRoom(null);
+      } else {
+        // Create new room
+        await api.post('/rooms', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        await fetchRooms(); // Refresh the list
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      setError('Failed to save room');
+      console.error('Error saving room:', err);
     }
   };
 
@@ -33,15 +105,33 @@ const RoomsManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Delete this room?")) {
-      setRooms((prev) => prev.filter((r) => r.id !== id));
+  const handleDelete = (room) => {
+    setRoomToDelete(room);
+    setConfirmDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (roomToDelete) {
+      try {
+        await api.delete(`/rooms/${roomToDelete._id}`);
+        setRooms(rooms.filter(room => room._id !== roomToDelete._id));
+        setConfirmDialogOpen(false);
+        setRoomToDelete(null);
+      } catch (err) {
+        setError('Failed to delete room');
+        console.error('Error deleting room:', err);
+      }
     }
   };
 
   const openAddModal = () => {
     setEditingRoom(null);
     setIsModalOpen(true);
+  };
+
+  const handleShow = (room) => {
+    setSelectedRoom(room);
+    setShowModalOpen(true);
   };
 
   return (
@@ -57,41 +147,37 @@ const RoomsManagement = () => {
           </button>
         </div>
 
-        {/* Room List */}
-        <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
-          <thead className="bg-accent text-white">
-            <tr>
-              <th className="p-3 text-left font-primary">Room No.</th>
-              <th className="p-3 text-left font-primary">Type</th>
-              <th className="p-3 text-left font-primary">Price</th>
-              <th className="p-3 text-center font-primary">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rooms.map((room) => (
-              <tr key={room.id} className="border-b">
-                <td className="p-3 font-secondary">{room.roomNumber}</td>
-                <td className="p-3 font-secondary">{room.type}</td>
-                <td className="p-3 font-secondary">{room.price}</td>
-                <td className="p-3 text-center flex justify-center gap-2">
-                  <button onClick={() => handleEdit(room)} className="text-accent hover:underline">
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={() => handleDelete(room.id)} className="text-red-600 hover:underline">
-                    <Trash size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {rooms.length === 0 && (
-              <tr>
-                <td colSpan="4" className="text-center py-4 text-gray-500 font-secondary">
-                  No rooms found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <FilterTable onFilter={handleFilter} placeholder="Filter rooms by room number..." />
+
+        <DataTable
+          columns={[
+            { key: 'roomNumber', label: 'Room Number' },
+            { key: 'type', label: 'Room Type' },
+            {
+              key: 'hotel',
+              label: 'Hotel Name',
+              render: (room) => room.hotel?.name || 'N/A'
+            },
+            {
+              key: 'isActive',
+              label: 'Is Active',
+              render: (room) => (
+                <span className={`px-2 py-1 rounded-full text-xs ${room.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {room.isActive ? 'Active' : 'Inactive'}
+                </span>
+              )
+            }
+          ]}
+          data={filteredRooms}
+          actions={[
+            { icon: <Eye size={16} />, onClick: handleShow, className: 'text-blue-600 hover:underline' },
+            { icon: <Edit size={16} />, onClick: handleEdit, className: 'text-accent hover:underline' },
+            { icon: <Trash size={16} />, onClick: (room) => handleDelete(room._id), className: 'text-red-600 hover:underline' }
+          ]}
+          loading={loading}
+          error={error}
+          emptyMessage="No rooms found."
+        />
 
         <AddEditModal
           isOpen={isModalOpen}
@@ -100,6 +186,21 @@ const RoomsManagement = () => {
           fields={fields}
           initialData={editingRoom}
           onSubmit={handleAddOrUpdate}
+        />
+
+        <ShowModal
+          isOpen={showModalOpen}
+          onClose={() => setShowModalOpen(false)}
+          title="Room Details"
+          data={selectedRoom}
+        />
+
+        <ConfirmationDialog
+          isOpen={confirmDialogOpen}
+          onClose={() => setConfirmDialogOpen(false)}
+          onConfirm={confirmDelete}
+          title="Delete Room"
+          message={`Are you sure you want to delete room "${roomToDelete?.roomNumber}"? This action cannot be undone.`}
         />
       </div>
     </div>

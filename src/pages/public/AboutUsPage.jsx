@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Shield, Clock, Briefcase } from "lucide-react";
 
 const Icon = ({ children }) => (
   <div className="w-12 h-12 flex items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -74,20 +75,7 @@ const AboutUsPage = () => {
           <div className="p-6 rounded-lg border bg-white shadow-lg">
             <div className="flex items-start gap-4">
               <Icon>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8c-1.657 0-3 1.343-3 3v6h6v-6c0-1.657-1.343-3-3-3zM6 8V6a6 6 0 0112 0v2"
-                  />
-                </svg>
+                <Shield className="w-6 h-6" />
               </Icon>
               <div>
                 <h3 className="font-bold text-gray-700">Thoughtful Design</h3>
@@ -101,20 +89,7 @@ const AboutUsPage = () => {
           <div className="p-6 rounded-lg border bg-white shadow-lg">
             <div className="flex items-start gap-4">
               <Icon>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4l3 3"
-                  />
-                </svg>
+                <Clock className="w-6 h-6" />
               </Icon>
               <div>
                 <h3 className="font-bold text-gray-700">Impeccable Service</h3>
@@ -128,20 +103,7 @@ const AboutUsPage = () => {
           <div className="p-6 rounded-lg border bg-white shadow-lg">
             <div className="flex items-start gap-4">
               <Icon>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 7h18M5 7v10a2 2 0 002 2h10a2 2 0 002-2V7"
-                  />
-                </svg>
+                <Briefcase className="w-6 h-6" />
               </Icon>
               <div>
                 <h3 className="font-bold text-gray-700">Curated Experiences</h3>

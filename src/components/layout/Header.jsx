@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BsDoorOpen, BsBoxArrowRight, BsList } from 'react-icons/bs';
+import { DoorOpen, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 
 const Header = ({ onToggleSidebar, logout }) => {
@@ -14,7 +14,7 @@ const Header = ({ onToggleSidebar, logout }) => {
               onClick={onToggleSidebar}
               className="text-gray-700 hover:text-accent font-secondary"
             >
-              <BsList className="w-6 h-6" />
+              <Menu className="w-6 h-6" />
             </button>
           </div>
           <div className="flex items-center gap-4">
@@ -22,7 +22,7 @@ const Header = ({ onToggleSidebar, logout }) => {
               to="/"
               className="text-gray-700 hover:text-accent font-secondary flex items-center gap-1"
             >
-              <BsDoorOpen className="w-5 h-5" /> Public Site
+              <DoorOpen className="w-5 h-5" /> Public Site
             </Link>
             <button
               onClick={() => {
@@ -31,7 +31,7 @@ const Header = ({ onToggleSidebar, logout }) => {
               }}
               className="text-gray-700 hover:text-accent font-secondary flex items-center gap-1"
             >
-              <BsBoxArrowRight className="w-5 h-5" /> Logout
+              <LogOut className="w-5 h-5" /> Logout
             </button>
           </div>
         </div>

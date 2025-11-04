@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BsGraphUp, BsDoorOpen, BsBoxArrowRight, BsPeople, BsBuilding, BsHouseDoor } from 'react-icons/bs';
+import { TrendingUp, DoorOpen, LogOut, Users, Building, Home } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   to="/admin/dashboard"
                   className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
-                  <BsGraphUp className="w-5 h-5 flex-shrink-0" />
+                  <TrendingUp className="w-5 h-5 flex-shrink-0" />
                   <span>Dashboard</span>
                 </Link>
               </li>
@@ -38,7 +38,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   to="/admin/users"
                   className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
-                  <BsPeople className="w-5 h-5 flex-shrink-0" />
+                  <Users className="w-5 h-5 flex-shrink-0" />
                   <span>User Management</span>
                 </Link>
               </li>
@@ -47,7 +47,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   to="/admin/hotels"
                   className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
-                  <BsBuilding className="w-5 h-5 flex-shrink-0" />
+                  <Building className="w-5 h-5 flex-shrink-0" />
                   <span>Hotel Management</span>
                 </Link>
               </li>
@@ -56,7 +56,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   to="/admin/rooms"
                   className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
-                  <BsHouseDoor className="w-5 h-5 flex-shrink-0" />
+                  <Home className="w-5 h-5 flex-shrink-0" />
                   <span>Rooms Management</span>
                 </Link>
               </li>
@@ -65,7 +65,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   to="/"
                   className="flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-accent/10 hover:text-accent transition-colors font-secondary"
                 >
-                  <BsDoorOpen className="w-5 h-5 flex-shrink-0" />
+                  <DoorOpen className="w-5 h-5 flex-shrink-0" />
                   <span>Public Site</span>
                 </Link>
               </li>
@@ -77,7 +77,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
                   }}
                   className="w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors font-secondary"
                 >
-                  <BsBoxArrowRight className="w-5 h-5 flex-shrink-0" />
+                  <LogOut className="w-5 h-5 flex-shrink-0" />
                   <span>Logout</span>
                 </button>
               </li>

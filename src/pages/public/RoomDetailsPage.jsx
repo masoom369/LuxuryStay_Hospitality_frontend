@@ -8,7 +8,7 @@ import {
 } from "../../components";
 import { hotelRules } from "../../constants/data";
 import { useParams } from "react-router-dom";
-import { FaCheck } from "react-icons/fa";
+import { Check } from "lucide-react";
 import api from "../../services/api";
 
 const RoomDetailsPage = () => {
@@ -122,7 +122,7 @@ const RoomDetailsPage = () => {
               <ul className="flex flex-col gap-y-4">
                 {hotelRules.map(({ rules }, idx) => (
                   <li key={idx} className="flex items-center gap-x-4">
-                    <FaCheck className="text-accent" />
+                    <Check className="text-accent" />
                     {rules}
                   </li>
                 ))}
