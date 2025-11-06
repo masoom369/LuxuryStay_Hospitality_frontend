@@ -1,4 +1,3 @@
-import AdminAccount from "./pages/admin/AdminAccount";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PageNotFound } from "./components";
 
@@ -13,7 +12,7 @@ import {
   ContactUsPage,
   FAQPage,
   PrivacyPolicyPage,
-  RoomDetailsPage,
+  RoomPackageDetailPage,
 } from "./pages";
 
 // Pages (Admin)
@@ -33,7 +32,7 @@ const App = () => {
           {/* Public Layout */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/room/:id" element={<RoomDetailsPage />} />
+            <Route path="/roompackage/:id" element={<RoomPackageDetailPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/faq" element={<FAQPage />} />
@@ -49,7 +48,6 @@ const App = () => {
              <Route path="users" element={<UserManagement />} />
             <Route path="hotels" element={<HotelManagement />} />
             <Route path="rooms" element={<RoomsManagement />} />
-            <Route path="account" element={<AdminAccount />} />
           </Route>
 
           {/* 404 Page */}

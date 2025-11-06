@@ -19,7 +19,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
       >
         <div className={`${sidebarOpen ? 'block' : 'hidden'} h-full flex flex-col w-64`}>
           <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="font-primary text-lg text-accent">Hotel Adina</h2>
+            <h2 className="font-primary text-lg text-accent">LuxuryStay Hospitality</h2>
           </div>
 
           <nav className="flex-1 mt-6 px-3">

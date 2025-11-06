@@ -1,8 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { adultsList } from '../constants/data';
 import { Menu } from '@headlessui/react';
+import { useRoomPackageContext } from '../context';
 
-const AdultsDropdown = ({ adults, setAdults }) => {
+const AdultsDropdown = () => {
+  const { adults, setAdults } = useRoomPackageContext();
   return (
     <Menu as='div' className='w-full h-full bg-white relative'>
 

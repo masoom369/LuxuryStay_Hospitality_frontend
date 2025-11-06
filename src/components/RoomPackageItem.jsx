@@ -1,9 +1,9 @@
 import { Maximize, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Room = ({ room }) => {
+const RoomPackageItem = ({ roomPackage }) => {
 
-  const { id, name, image, size, maxPerson, description, price } = room ?? {};
+  const { id, name, image, size, maxPerson, description, price } = roomPackage ?? {};
 
   return (
     <div className='bg-white shadow-2xl min-h-[500px] group'>
@@ -44,7 +44,7 @@ const Room = ({ room }) => {
 
       {/* name and description */}
       <div className='text-center'>
-        <Link to={`/room/${id}`}>
+        <Link to={`/roompackage/${id}`}>
           <h3 className="h3">{name}</h3>
         </Link>
 
@@ -54,7 +54,7 @@ const Room = ({ room }) => {
 
       {/* button */}
       <Link
-        to={`/room/${id}`}
+        to={`/roompackage/${id}`}
         className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300"
       >
         Book now from ${price}
@@ -65,4 +65,4 @@ const Room = ({ room }) => {
 
 };
 
-export default Room;
+export default RoomPackageItem;

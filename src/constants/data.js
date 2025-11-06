@@ -22,36 +22,36 @@ export const kidsList = [
 export const sliderData = [
     {
         id: 1,
-        title: 'Your Luxury Hotel For Vacation',
+        title: 'Experience LuxuryStay Hospitality',
         bg: images.Slider1,
-        btnNext: 'See our rooms',
+        btnNext: 'Explore Our Rooms',
     },
     {
         id: 2,
-        title: 'Feel Relax & Enjoy Your Luxuriousness',
+        title: 'Elevate Your Stay Experience',
         bg: images.Slider2,
-        btnNext: 'See our rooms',
+        btnNext: 'View Suites',
     },
     {
         id: 3,
-        title: 'Your Luxury Hotel For Vacation',
+        title: 'Where Luxury Meets Comfort',
         bg: images.Slider3,
-        btnNext: 'See our rooms',
+        btnNext: 'Book Now',
     },
 ]
 
 
 export const hotelRules = [
     {
-        rules: 'Check-in : 3:00 PM - 9:00 PM',
+        rules: 'Check-in: 3:00 PM - 11:00 PM',
     },
     {
-        rules: 'Check-out : 10:30 AM',
+        rules: 'Check-out: 11:00 AM',
     },
     {
-        rules: 'No Smoking',
+        rules: 'No Pets (except service animals)',
     },
     {
-        rules: 'No Pet',
+        rules: 'Non-smoking rooms available',
     },
 ]

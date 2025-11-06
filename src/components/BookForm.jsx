@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '.';
+import { useRoomPackageContext } from '../context';
+import AdultsDropdown from './AdultsDropdown';
+import CheckIn from './CheckIn';
+import CheckOut from './CheckOut';
+import KidsDropdown from './KidsDropdown';
 
 const BookForm = ({ handleCheck }) => {
-  const [adults, setAdults] = useState('1 Adult');
-  const [kids, setKids] = useState('0 Kid');
+  const { adults, kids } = useRoomPackageContext();
 
   return (
     <form className='h-[300px] lg:h-[70px] w-full'>
@@ -18,11 +20,11 @@ const BookForm = ({ handleCheck }) => {
         </div>
 
         <div className='flex-1 border-r'>
-          <AdultsDropdown adults={adults} setAdults={setAdults} />
+          <AdultsDropdown />
         </div>
 
         <div className='flex-1 border-r'>
-          <KidsDropdown kids={kids} setKids={setKids} />
+          <KidsDropdown />
         </div>
 
         <button

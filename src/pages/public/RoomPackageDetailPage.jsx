@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AdultsDropdown,
   CheckIn,
@@ -9,37 +9,18 @@ import {
 import { hotelRules } from "../../constants/data";
 import { useParams } from "react-router-dom";
 import { Check } from "lucide-react";
-import api from "../../services/api";
+import { roomPackageData } from "../../db/data";
 
-const RoomDetailsPage = () => {
-  const { id } = useParams(); // id get form url (/room/:id) as string...
-  const [room, setRoom] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRoom = async () => {
-      try {
-        const response = await api.get(`/rooms/${id}`);
-        setRoom(response.data.data);
-      } catch (error) {
-        console.error("Error fetching room:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRoom();
-  }, [id]);
-
-  if (loading) {
-    return <div>Loading...</div>;
+const RoomPackageDetailPage = () => {
+  const { id } = useParams(); // id get form url (/roompackage/:id) as string...
+  const roomId = parseInt(id);
+  const roomPackage = roomPackageData.find(room => room.id === roomId);
+  
+  if (!roomPackage) {
+    return <div>Room Package not found</div>;
   }
 
-  if (!room) {
-    return <div>Room not found</div>;
-  }
-
-  const { name, description, facilities, price, imageLg } = room;
+  const { name, description, facilities, price, imageLg } = roomPackage;
 
   return (
     <section>
@@ -61,14 +42,7 @@ const RoomDetailsPage = () => {
             <img className="mb-8" src={imageLg} alt="roomImg" />
 
             <div className="mt-12">
-              <h3 className="h3 mb-3"></h3>
-              <p className="mb-12">
-                {" "}
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Blanditiis accusantium sapiente quas quos explicabo, odit
-                nostrum? Reiciendis illum dolor eos dicta. Illum vero at hic
-                nostrum sint et quod porro.{" "}
-              </p>
+              <h3 className="h3 mb-3">Room Amenities</h3>
 
               {/* icons grid */}
               <div className="grid grid-cols-3 gap-6 mb-12">
@@ -114,9 +88,7 @@ const RoomDetailsPage = () => {
             <div>
               <h3 className="h3">Hotel Rules</h3>
               <p className="mb-6 text-justify">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi
-                dolores iure fugiat eligendi illo est, aperiam quasi distinctio
-                necessitatibus suscipit nemo provident eaque voluptas earum.
+                Please familiarize yourself with our hotel policies and guidelines to ensure a pleasant stay.
               </p>
 
               <ul className="flex flex-col gap-y-4">
@@ -135,4 +107,4 @@ const RoomDetailsPage = () => {
   );
 };
 
-export default RoomDetailsPage;
+export default RoomPackageDetailPage;

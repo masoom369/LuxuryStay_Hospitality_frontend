@@ -1,7 +1,7 @@
 import { SpinnerDotted } from 'spinners-react';
-import { Room } from '.';
+import RoomPackageItem from './RoomPackageItem';
 
-const Rooms = ({ rooms, loading }) => {
+const RoomPackage = ({ roomPackages, loading }) => {
   return (
     <section className='py-24'>
 
@@ -16,14 +16,14 @@ const Rooms = ({ rooms, loading }) => {
       <div className='container mx-auto lg:px-0'>
 
         <div className='text-center'>
-          <p className='font-tertiary uppercase text-[15px] tracking-[6px]'>Hotel Adina</p>
-          <h2 className='font-primary text-[45px] mb-6'>Room & Suites</h2>
+          <p className='font-tertiary uppercase text-[15px] tracking-[6px]'>LuxuryStay Hospitality</p>
+          <h2 className='font-primary text-[45px] mb-6'>Room Package & Suites</h2>
         </div>
 
         <div className='grid grid-cols-1 max-w-sm mx-auto gap-[30px] lg:grid-cols-3 lg:max-w-none lg:mx-0'>
           {
-            rooms.map(room =>
-              <Room key={room.id} room={room} />
+            roomPackages.map(roomPackage =>
+              <RoomPackageItem key={roomPackage.id} roomPackage={roomPackage} />
             )
           }
         </div>
@@ -33,4 +33,4 @@ const Rooms = ({ rooms, loading }) => {
   );
 };
 
-export default Rooms;
+export default RoomPackage;
