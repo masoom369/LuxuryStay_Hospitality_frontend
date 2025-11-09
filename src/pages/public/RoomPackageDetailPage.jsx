@@ -45,7 +45,7 @@ const RoomPackageDetailPage = () => {
               <h3 className="h3 mb-3">Room Amenities</h3>
 
               {/* icons grid */}
-              <div className="grid grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-2 gap-6 mb-12">
                 {facilities.map((item, index) => (
                   <div key={index} className="flex items-center gap-x-3 flex-1">
                     <div className="text-3xl text-accent">{<item.icon />}</div>

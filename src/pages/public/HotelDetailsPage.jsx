@@ -57,12 +57,18 @@ const HotelDetailsPage = () => {
 
             <div className="mt-12">
               <h3 className="h3 mb-3">Location</h3>
-              <p className="mb-12">{location || "LuxuryStay Property"}</p>
+              <p className="mb-12">
+                {location && typeof location === 'object' ? (
+                  `${location.address || ''}${location.address ? ', ' : ''}${location.city || ''}${location.state ? `, ${location.state}` : ''}${location.zipCode ? ` ${location.zipCode}` : ''}${location.country ? `, ${location.country}` : ''}`
+                ) : (
+                  location || "LuxuryStay Property"
+                )}
+              </p>
 
               <h3 className="h3 mb-3">Hotel Amenities</h3>
 
               {/* Amenities grid */}
-              <div className="grid grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-2 gap-6 mb-12">
                 {amenities?.map((amenity, index) => (
                   <div key={index} className="flex items-center gap-x-3 flex-1">
                     <div className="text-3xl text-accent">

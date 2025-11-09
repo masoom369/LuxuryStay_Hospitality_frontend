@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BookForm, HeroSlider, RoomPackage, ScrollToTop } from "../../components";
 import { useRoomPackageContext } from "../../context";
+import HotelCarousel from "../../components/HotelCarousel";
 
 const HomePage = () => {
   const { roomPackages, loading, handleCheck, resetRoomPackageFilterData } = useRoomPackageContext();
@@ -16,6 +17,8 @@ const HomePage = () => {
           <BookForm handleCheck={handleCheck} />
         </div>
       </div>
+
+      <HotelCarousel/>
 
       <RoomPackage roomPackages={roomPackages} loading={loading} />
     </div>

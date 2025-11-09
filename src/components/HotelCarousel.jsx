@@ -55,7 +55,7 @@ const HotelCarousel = () => {
   return (
     <section className="py-12 relative">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">Featured Hotels</h2>
+        <h2 className="h2 text-center mb-8">Featured Hotels</h2>
         
         <div className="relative overflow-hidden max-w-6xl mx-auto">
           <div 
@@ -67,7 +67,7 @@ const HotelCarousel = () => {
                 key={hotel._id} 
                 className="w-full flex-shrink-0 px-4"
               >
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-1/2">
                       <img 
@@ -79,9 +79,9 @@ const HotelCarousel = () => {
                         }}
                       />
                     </div>
-                    <div className="md:w-1/2 p-6 flex flex-col justify-center">
-                      <h3 className="text-2xl font-bold mb-2">{hotel.name}</h3>
-                      <p className="text-gray-600 mb-4 line-clamp-3">
+                    <div className="md:w-1/2 p-8 flex flex-col justify-center">
+                      <h3 className="h3 mb-2">{hotel.name}</h3>
+                      <p className="text-gray-600 mb-4">
                         {hotel.description || 'Experience luxury and comfort at our exquisite hotel.'}
                       </p>
                       <div className="flex flex-wrap gap-2 mb-4">
@@ -94,15 +94,24 @@ const HotelCarousel = () => {
                           </span>
                         ))}
                       </div>
-                      <div className="text-gray-700 mb-4">
-                        <p><span className="font-semibold">Location:</span> {hotel.location}</p>
+                      <div className="text-gray-700 mb-6">
+                        {hotel.location && typeof hotel.location === 'object' ? (
+                          <>
+                            <p><span className="font-semibold">Location:</span> {hotel.location.address || "Address not specified"}</p>
+                            <p>{hotel.location.city}{hotel.location.state ? `, ${hotel.location.state}` : ''}{hotel.location.zipCode ? ` ${hotel.location.zipCode}` : ''}</p>
+                          </>
+                        ) : (
+                          <p><span className="font-semibold">Location:</span> {hotel.location || "LuxuryStay Property"}</p>
+                        )}
                       </div>
+                       <div className="flex gap-4">
                       <Link 
-                        to={`/hotel/${hotel._id}`}
-                        className="btn btn-primary self-start mt-2"
+                        to={`/hotels/${hotel._id}`}
+                        className="btn btn-secondary  w-full py-2 px-3 rounded-md shadow-sm"
                       >
                         View Details
                       </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -113,14 +122,14 @@ const HotelCarousel = () => {
           {/* Navigation buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10 transition-colors"
             aria-label="Previous hotel"
           >
             <ChevronLeft className="w-6 h-6 text-gray-800" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10 transition-colors"
             aria-label="Next hotel"
           >
             <ChevronRight className="w-6 h-6 text-gray-800" />
@@ -133,7 +142,7 @@ const HotelCarousel = () => {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`w-3 h-3 rounded-full ${
-                  idx === currentIndex ? 'bg-white' : 'bg-white/50'
+                  idx === currentIndex ? 'bg-accent' : 'bg-accent/50'
                 }`}
                 aria-label={`Go to hotel ${idx + 1}`}
               />
