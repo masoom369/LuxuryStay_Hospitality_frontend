@@ -12,7 +12,7 @@ import {
 } from "../../components";
 import { hotelRules } from "../../constants/data";
 import Reviews from "../../components/Reviews";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 import { useAuth } from "../../context/AuthContext";
 
 const RoomDetailPage = () => {
@@ -39,7 +39,7 @@ const RoomDetailPage = () => {
     updateBookingAlert,
     clearBookingForm,
     handleBookingSubmission,
-  } = useRealTimeContext();
+  } = usePublicPagesContext();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);

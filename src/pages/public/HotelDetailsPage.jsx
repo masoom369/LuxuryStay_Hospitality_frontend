@@ -5,11 +5,11 @@ import { Check } from "lucide-react";
 import { hotelRules } from "../../constants/data";
 import RoomCarousel from "../../components/RoomCarousel";
 import Reviews from "../../components/Reviews";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 
 const HotelDetailsPage = () => {
   const { id } = useParams();
-  const { fetchHotelById, hotels } = useRealTimeContext();
+  const { fetchHotelById, hotels } = usePublicPagesContext();
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
 

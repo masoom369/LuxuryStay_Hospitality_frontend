@@ -6,7 +6,7 @@ import HotelDropdown from "../../components/HotelDropdown";
 import RoomDropdown from "../../components/RoomDropdown";
 import GuestInput from "../../components/GuestInput";
 import { Alert, ScrollToTop } from "../../components";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 import { useAuth } from "../../context/AuthContext";
 
 const OnlineBookingForm = () => {
@@ -32,7 +32,7 @@ const OnlineBookingForm = () => {
     setBookingSpecialRequests,
     updateBookingAlert,
     clearBookingForm,
-  } = useRealTimeContext();
+  } = usePublicPagesContext();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 

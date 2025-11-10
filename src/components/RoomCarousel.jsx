@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useRealTimeContext } from '../context/RealTimeContext';
+import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const RoomCarousel = ({ hotelId }) => {
-  const { fetchRooms, loading } = useRealTimeContext();
+  const { fetchRooms, loading } = usePublicPagesContext();
   const [rooms, setRooms] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 

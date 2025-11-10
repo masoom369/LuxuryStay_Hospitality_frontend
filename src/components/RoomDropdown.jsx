@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useRealTimeContext } from '../context/RealTimeContext';
+import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const RoomDropdown = ({ value, onChange, hotelId, checkInDate, checkOutDate, onMaxGuestsChange, loading }) => {
-  const { rooms: availableRooms, fetchAvailableRooms, loading: contextLoading } = useRealTimeContext();
+  const { rooms: availableRooms, fetchAvailableRooms, loading: contextLoading } = usePublicPagesContext();
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {

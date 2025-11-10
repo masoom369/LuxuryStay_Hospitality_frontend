@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ScrollToTop, HotelCard } from "../../components";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 
 const HotelListingPage = () => {
   const [localHotels, setLocalHotels] = useState([]);
-  const { hotels, fetchHotelsWithFilters, loading } = useRealTimeContext();
+  const { hotels, fetchHotelsWithFilters, loading } = usePublicPagesContext();
 
   useEffect(() => {
     fetchHotelsWithFilters();

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRealTimeContext } from '../context/RealTimeContext';
+import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const Testimonials = () => {
-  const { testimonials, fetchTestimonials, loading } = useRealTimeContext();
+  const { testimonials, fetchTestimonials, loading } = usePublicPagesContext();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch testimonials if none exist (only when fetchTestimonials changes, which should be never due to useCallback)

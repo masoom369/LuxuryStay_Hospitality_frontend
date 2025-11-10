@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Alert } from "../../components";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 
 const ContactUsPage = () => {
-  const { submitContactForm, loading } = useRealTimeContext();
+  const { submitContactForm, loading } = usePublicPagesContext();
   const [formData, setFormData] = useState({
     name: "",
     email: "",

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { useRealTimeContext } from '../context/RealTimeContext';
+import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const Reviews = ({ hotelId, roomId = null }) => {
-  const { fetchReviews, loading: contextLoading } = useRealTimeContext();
+  const { fetchReviews, loading: contextLoading } = usePublicPagesContext();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
 

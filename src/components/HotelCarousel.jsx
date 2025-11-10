@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useRealTimeContext } from '../context/RealTimeContext';
+import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const HotelCarousel = () => {
-  const { hotels, fetchHotelsWithFilters, loading } = useRealTimeContext();
+  const { hotels, fetchHotelsWithFilters, loading } = usePublicPagesContext();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {

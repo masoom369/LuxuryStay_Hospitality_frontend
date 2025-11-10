@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import api from "../services/api";
 
-const RealTimeContext = createContext(null);
+const PublicPagesContext = createContext(null);
 
-export const RealTimeProvider = ({ children }) => {
+export const PublicPagesProvider = ({ children }) => {
   // === STATE ===
   const [rooms, setRooms] = useState([]);
   const [hotels, setHotels] = useState([]);
@@ -337,18 +337,18 @@ export const RealTimeProvider = ({ children }) => {
   };
 
   return (
-    <RealTimeContext.Provider value={contextValue}>
+    <PublicPagesContext.Provider value={contextValue}>
       {children}
-    </RealTimeContext.Provider>
+    </PublicPagesContext.Provider>
   );
 };
 
 // === HOOK EXPORT ===
-export const useRealTimeContext = () => {
-  const context = useContext(RealTimeContext);
+export const usePublicPagesContext = () => {
+  const context = useContext(PublicPagesContext);
   if (!context) {
     throw new Error(
-      "useRealTimeContext must be used within a RealTimeProvider"
+      "usePublicPagesContext must be used within a PublicPagesProvider"
     );
   }
   return context;

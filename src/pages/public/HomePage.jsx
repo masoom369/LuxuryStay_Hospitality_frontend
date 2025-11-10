@@ -7,7 +7,7 @@ import {
   ScrollToTop,
 } from "../../components";
 import { useRoomPackageContext } from "../../context";
-import { useRealTimeContext } from "../../context/RealTimeContext";
+import { usePublicPagesContext } from "../../context/PublicPagesContext";
 import { useAuth } from "../../context/AuthContext";
 import HotelCarousel from "../../components/HotelCarousel";
 import Testimonials from "../../components/Testimonials";
@@ -35,7 +35,7 @@ const HomePage = () => {
     setBookingSpecialRequests,
     updateBookingAlert,
     handleBookingSubmission,
-  } = useRealTimeContext();
+  } = usePublicPagesContext();
   
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
