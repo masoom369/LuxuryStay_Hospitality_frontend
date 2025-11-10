@@ -1,4 +1,5 @@
 import { AuthProvider, RoomPackageContext } from "./context";
+import { RealTimeProvider } from "./context/RealTimeContext";
 import ReactDOM from "react-dom/client";
 import React from "react";
 import App from "./App";
@@ -7,9 +8,11 @@ import "./style/index.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AuthProvider>
     <RoomPackageContext>
-      <React.StrictMode>
+      <RealTimeProvider>
+        <React.StrictMode>
           <App />
-      </React.StrictMode>
+        </React.StrictMode>
+      </RealTimeProvider>
     </RoomPackageContext>
   </AuthProvider>
 );

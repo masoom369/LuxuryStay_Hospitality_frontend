@@ -1,11 +1,4 @@
-import { useState } from "react";
-import {
-  AdultsDropdown,
-  CheckIn,
-  CheckOut,
-  KidsDropdown,
-  ScrollToTop,
-} from "../../components";
+import { ScrollToTop } from "../../components";
 import { hotelRules } from "../../constants/data";
 import { useParams } from "react-router-dom";
 import { Check } from "lucide-react";
@@ -14,8 +7,8 @@ import { roomPackageData } from "../../db/data";
 const RoomPackageDetailPage = () => {
   const { id } = useParams(); // id get form url (/roompackage/:id) as string...
   const roomId = parseInt(id);
-  const roomPackage = roomPackageData.find(room => room.id === roomId);
-  
+  const roomPackage = roomPackageData.find((room) => room.id === roomId);
+
   if (!roomPackage) {
     return <div>Room Package not found</div>;
   }
@@ -58,37 +51,52 @@ const RoomPackageDetailPage = () => {
 
           {/* ➡️➡️➡️ right side ➡️➡️➡️ */}
           <div className="w-full lg:w-[40%] h-full">
-            {/* reservation */}
+            {/* package info */}
             <div className="py-8 px-6 bg-accent/20 mb-12">
-              <div className="flex flex-col space-y-4 mb-4">
-                <h3>Your Reservation</h3>
-                <div className="h-[60px]">
-                  {" "}
-                  <CheckIn />{" "}
+              <h3 className="h3 mb-6">Package Details</h3>
+
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-lg font-semibold">
+                    Price per night:
+                  </span>
+                  <span className="text-xl font-bold text-accent">
+                    ${price}
+                  </span>
                 </div>
-                <div className="h-[60px]">
-                  {" "}
-                  <CheckOut />{" "}
-                </div>
-                <div className="h-[60px]">
-                  {" "}
-                  <AdultsDropdown />{" "}
-                </div>
-                <div className="h-[60px]">
-                  {" "}
-                  <KidsDropdown />{" "}
+
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <Check className="text-accent mr-2" />
+                    <span>Free cancellation up to 24 hours</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-accent mr-2" />
+                    <span>Breakfast included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-accent mr-2" />
+                    <span>Free Wi-Fi</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-accent mr-2" />
+                    <span>Room service available</span>
+                  </div>
                 </div>
               </div>
 
-              <button className="btn btn-lg btn-primary w-full">
-                book now for ${price}
-              </button>
+              <div className="bg-white/10 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Contact us to book:</h4>
+                <p className="text-sm">Phone: +1 (555) 123-4567</p>
+                <p className="text-sm">Email: reservations@luxurystay.com</p>
+              </div>
             </div>
 
             <div>
-              <h3 className="h3">Hotel Rules</h3>
+              <h3 className="h3">Package Inclusions</h3>
               <p className="mb-6 text-justify">
-                Please familiarize yourself with our hotel policies and guidelines to ensure a pleasant stay.
+                Your package includes all the amenities and services listed,
+                ensuring a comfortable and memorable stay.
               </p>
 
               <ul className="flex flex-col gap-y-4">

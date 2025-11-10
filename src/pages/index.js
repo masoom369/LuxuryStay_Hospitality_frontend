@@ -8,6 +8,7 @@ export { default as AboutUsPage } from './public/AboutUsPage';
 export { default as ContactUsPage } from './public/ContactUsPage';
 export { default as FAQPage } from './public/FAQPage';
 export { default as PrivacyPolicyPage } from './public/PrivacyPolicyPage';
+export { default as RoomDetailPage } from './public/RoomDetailPage';
 export { default as RoomPackageDetailPage } from './public/RoomPackageDetailPage';
 export { default as HomePage } from './public/HomePage';
 export { default as HotelListingPage } from './public/HotelListingPage';

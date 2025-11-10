@@ -57,7 +57,7 @@ const RoomPackageItem = ({ roomPackage }) => {
         to={`/roompackage/${id}`}
         className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300"
       >
-        Book now from ${price}
+        View Details
       </Link>
 
     </div>

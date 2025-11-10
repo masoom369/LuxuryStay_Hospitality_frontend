@@ -1,44 +1,49 @@
 import React, { useState } from "react";
 import { Alert } from "../../components";
-import api from "../../services/api";
+import { useRealTimeContext } from "../../context/RealTimeContext";
 
 const ContactUsPage = () => {
+  const { submitContactForm, loading } = useRealTimeContext();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     subject: "",
-    message: ""
+    message: "",
   });
   const [alert, setAlert] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/contact', formData);
+      const response = await submitContactForm(formData);
       setAlert({
         type: "success",
-        message: response.data.message || "Thank you for contacting us! We will get back to you soon.",
+        message:
+          response.message ||
+          "Thank you for contacting us! We will get back to you soon.",
       });
       setFormData({
         name: "",
         email: "",
         phone: "",
         subject: "",
-        message: ""
+        message: "",
       });
     } catch (error) {
       setAlert({
         type: "error",
-        message: error.response?.data?.message || "Failed to send message. Please try again.",
+        message:
+          error.response?.data?.message ||
+          "Failed to send message. Please try again.",
       });
     }
   };

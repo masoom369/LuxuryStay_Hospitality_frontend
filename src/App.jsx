@@ -15,12 +15,14 @@ import {
   RoomPackageDetailPage,
   HotelDetailsPage,
   HotelListingPage,
+  RoomDetailPage,
 } from "./pages";
 
 // Pages (Admin)
 import HotelManagement from "./pages/admin/HotelManagement";
 import RoomsManagement from "./pages/admin/RoomsManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import ManageContactUs from "./pages/admin/ManageContactUs";
 
 // Pages (Guest)
 import GuestDashboard from "./pages/guest/GuestDashboard";
@@ -71,6 +73,7 @@ const App = () => {
               path="/roompackage/:id"
               element={<RoomPackageDetailPage />}
             />
+            <Route path="/room/:id" element={<RoomDetailPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/faq" element={<FAQPage />} />

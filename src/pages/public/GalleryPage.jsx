@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { ScrollToTop } from "../../components";
 
 const GalleryImage = ({ src, alt, onClick }) => (
-  <div className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={onClick}>
+  <div
+    className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer"
+    onClick={onClick}
+  >
     <img
       src={src}
       alt={alt}
@@ -91,12 +94,11 @@ const GalleryPage = () => {
       {/* Gallery Content */}
       <div className="container mx-auto py-14 px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-primary mb-6">
-            Experience LuxuryStay
-          </h2>
+          <h2 className="text-3xl font-primary mb-6">Experience LuxuryStay</h2>
           <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Take a visual journey through our world-class properties, elegant rooms,
-            and exceptional amenities that define the LuxuryStay experience.
+            Take a visual journey through our world-class properties, elegant
+            rooms, and exceptional amenities that define the LuxuryStay
+            experience.
           </p>
         </div>
 
@@ -126,7 +128,9 @@ const GalleryPage = () => {
       <div className="bg-gray-50 py-12 px-4">
         <div className="container mx-auto">
           <div className="p-6 bg-primary text-white rounded-lg shadow-lg text-center">
-            <h3 className="font-bold text-white mb-2">Ready to experience this luxury?</h3>
+            <h3 className="font-bold text-white mb-2">
+              Ready to experience this luxury?
+            </h3>
             <p className="text-white/90 text-sm mb-4">
               Book your stay and discover the LuxuryStay difference firsthand.
             </p>

@@ -1,27 +1,18 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import { useRealTimeContext } from '../context/RealTimeContext';
 
 const HotelCarousel = () => {
-  const [hotels, setHotels] = useState([]);
+  const { hotels, fetchHotelsWithFilters, loading } = useRealTimeContext();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHotels = async () => {
-      try {
-        const response = await api.get('/hotels');
-        setHotels(response.data.data);
-      } catch (error) {
-        console.error('Error fetching hotels:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHotels();
-  }, []);
+    fetchHotelsWithFilters();
+  }, [fetchHotelsWithFilters]); // Added fetchHotelsWithFilters to dependencies now that it's memoized
+  
+  // Extract hotels loading state specifically
+  const hotelsLoading = loading?.hotels || false;
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => 
@@ -44,7 +35,7 @@ const HotelCarousel = () => {
     return () => clearInterval(interval);
   }, [hotels.length]);
 
-  if (loading || hotels.length === 0) {
+  if (hotelsLoading || hotels.length === 0) {
     return (
       <div className="py-12 text-center">
         <p>Loading hotels...</p>

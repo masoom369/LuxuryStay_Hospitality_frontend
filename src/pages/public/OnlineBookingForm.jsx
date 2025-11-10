@@ -1,64 +1,70 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  AdultsDropdown,
-  CheckIn,
-  CheckOut,
-  KidsDropdown,
-  ScrollToTop,
-  Alert,
-} from "../../components";
-import api from "../../services/api";
+import { Link, useNavigate } from "react-router-dom";
+import CheckIn from "../../components/CheckIn";
+import CheckOut from "../../components/CheckOut";
+import HotelDropdown from "../../components/HotelDropdown";
+import RoomDropdown from "../../components/RoomDropdown";
+import GuestInput from "../../components/GuestInput";
+import { Alert, ScrollToTop } from "../../components";
+import { useRealTimeContext } from "../../context/RealTimeContext";
+import { useAuth } from "../../context/AuthContext";
 
 const OnlineBookingForm = () => {
-  const [formData, setFormData] = useState({
-    checkIn: "",
-    checkOut: "",
-    adults: "1 Adult",
-    kids: "0 Kid",
-    roomType: "",
-    specialRequests: "",
-  });
-  const [alert, setAlert] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    submitReservation,
+    loading: contextLoading,
+    checkInDate,
+    checkOutDate,
+    selectedHotel,
+    selectedRooms,
+    guests,
+    maxGuests,
+    specialRequests,
+    bookingAlert,
+    bookingLoading,
+    handleBookingSubmission,
+    setBookingCheckInDate,
+    setBookingCheckOutDate,
+    setBookingHotel,
+    setBookingRooms,
+    setBookingGuests,
+    setBookingMaxGuests,
+    setBookingSpecialRequests,
+    updateBookingAlert,
+    clearBookingForm,
+  } = useRealTimeContext();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "specialRequests") {
+      setBookingSpecialRequests(value);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const response = await api.post("/bookings", formData);
-      setAlert({
-        type: "success",
-        message: response.data.message || "Booking request submitted successfully! We'll contact you soon.",
-      });
-      setFormData({
-        checkIn: "",
-        checkOut: "",
-        adults: "1 Adult",
-        kids: "0 Kid",
-        roomType: "",
-        specialRequests: "",
-      });
-    } catch (error) {
-      setAlert({
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      const alert = {
         type: "error",
-        message: error.response?.data?.message || "Failed to submit booking. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+        message:
+          "You must be logged in to make a reservation. Redirecting to login...",
+      };
+      updateBookingAlert(alert);
 
-  const closeAlert = () => setAlert(null);
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      return;
+    }
+
+    // Use the context's handleBookingSubmission function
+    const result = await handleBookingSubmission();
+  };
 
   return (
     <section>
@@ -74,75 +80,90 @@ const OnlineBookingForm = () => {
 
       {/* Booking Form Section */}
       <div className="container mx-auto py-14 px-4">
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <h2 className="text-3xl font-primary text-center mb-6">
               Reserve Your Room
             </h2>
 
-            {alert && (
+            {bookingAlert && (
               <Alert
-                type={alert.type}
-                message={alert.message}
-                onClose={closeAlert}
-                autoClose={alert.type === "success"}
+                type={bookingAlert.type}
+                message={bookingAlert.message}
+                onClose={() => updateBookingAlert(null)}
+                autoClose={bookingAlert.type === "success"}
               />
             )}
 
+            {/* New Booking Form */}
+            <div className="mb-6">
+              <div className="grid md:grid-cols-5 gap-4">
+                {/* Check-in Date */}
+                <div className="border-r">
+                  <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
+                    Check-in
+                  </label>
+                  <CheckIn
+                    selectedDate={checkInDate}
+                    onDateChange={setBookingCheckInDate}
+                  />
+                </div>
+
+                {/* Check-out Date */}
+                <div className="border-r">
+                  <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
+                    Check-out
+                  </label>
+                  <CheckOut
+                    selectedDate={checkOutDate}
+                    onDateChange={setBookingCheckOutDate}
+                    startDate={checkInDate}
+                  />
+                </div>
+
+                {/* Hotel Selection */}
+                <div className="border-r">
+                  <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
+                    Hotel
+                  </label>
+                  <HotelDropdown
+                    value={selectedHotel}
+                    onChange={(e) => {
+                      setBookingHotel(e.target.value);
+                    }}
+                  />
+                </div>
+
+                {/* Room Selection */}
+                <div className="border-r">
+                  <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
+                    Rooms
+                  </label>
+                  <RoomDropdown
+                    value={selectedRooms}
+                    onChange={setBookingRooms}
+                    onMaxGuestsChange={setBookingMaxGuests}
+                    hotelId={selectedHotel}
+                    checkInDate={checkInDate}
+                    checkOutDate={checkOutDate}
+                  />
+                </div>
+
+                {/* Guests */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
+                    Guests
+                  </label>
+                  <GuestInput
+                    value={guests}
+                    onChange={setBookingGuests}
+                    max={maxGuests}
+                  />
+                </div>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit}>
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Check-in Date
-                  </label>
-                  <CheckIn />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Check-out Date
-                  </label>
-                  <CheckOut />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Adults
-                  </label>
-                  <AdultsDropdown />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Children
-                  </label>
-                  <KidsDropdown />
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label
-                  htmlFor="roomType"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  Room Type
-                </label>
-                <select
-                  id="roomType"
-                  name="roomType"
-                  value={formData.roomType}
-                  onChange={handleChange}
-                  required
-                  className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-                >
-                  <option value="">Select Room Type</option>
-                  <option value="standard">Standard Room</option>
-                  <option value="deluxe">Deluxe Room</option>
-                  <option value="suite">Suite</option>
-                  <option value="presidential">Presidential Suite</option>
-                </select>
-              </div>
-
               <div className="mb-6">
                 <label
                   htmlFor="specialRequests"
@@ -154,7 +175,7 @@ const OnlineBookingForm = () => {
                   id="specialRequests"
                   name="specialRequests"
                   rows="4"
-                  value={formData.specialRequests}
+                  value={specialRequests}
                   onChange={handleChange}
                   placeholder="Any special requests or requirements..."
                   className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
@@ -163,10 +184,10 @@ const OnlineBookingForm = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={bookingLoading}
                 className="btn btn-lg btn-primary w-full"
               >
-                {loading ? "Submitting..." : "Submit Booking Request"}
+                {bookingLoading ? "Submitting..." : "Submit Booking Request"}
               </button>
             </form>
           </div>
@@ -177,10 +198,7 @@ const OnlineBookingForm = () => {
           <p className="text-gray-700 mb-4">
             Need help with your booking? Contact our reservations team.
           </p>
-          <Link
-            to="/contact"
-            className="btn btn-primary btn-sm"
-          >
+          <Link to="/contact" className="btn btn-primary btn-sm">
             Contact Us
           </Link>
         </div>
