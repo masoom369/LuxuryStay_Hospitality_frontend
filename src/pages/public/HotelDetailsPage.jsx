@@ -55,7 +55,7 @@ const HotelDetailsPage = () => {
       </div>
 
       <div className="container mx-auto">
-        <div className="flex flex-col lg:flex-row lg:gap-x-8 h-full py-12 lg:py-24">
+        <div className="flex flex-col lg:flex-row lg:gap-x-8 h-full py-6 lg:py-12">
           {/* Left Side */}
           <div className="w-full lg:w-[60%] h-full text-justify">
             <h2 className="h2">{name}</h2>
@@ -66,9 +66,9 @@ const HotelDetailsPage = () => {
               alt="hotelImg"
             />
 
-            <div className="mt-12">
+            <div className="mt-6">
               <h3 className="h3 mb-3">Location</h3>
-              <p className="mb-12">
+              <p className="mb-6">
                 {location && typeof location === "object"
                   ? `${location.address || ""}${location.address ? ", " : ""}${
                       location.city || ""

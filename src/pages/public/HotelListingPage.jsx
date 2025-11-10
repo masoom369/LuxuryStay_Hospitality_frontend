@@ -37,7 +37,7 @@ const HotelListingPage = () => {
           </p>
         </div>
 
-        {loading ? (
+        {loading.hotels ? (
           <div className="text-center py-12">Loading hotels...</div>
         ) : hotelsToDisplay.length === 0 ? (
           <div className="text-center py-12">No hotels found.</div>

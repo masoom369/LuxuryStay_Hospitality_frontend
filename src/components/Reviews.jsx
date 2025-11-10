@@ -3,29 +3,35 @@ import { Star } from 'lucide-react';
 import { useRealTimeContext } from '../context/RealTimeContext';
 
 const Reviews = ({ hotelId, roomId = null }) => {
-  const { fetchReviews, loading } = useRealTimeContext();
+  const { fetchReviews, loading: contextLoading } = useRealTimeContext();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
-    const loadReviews = async () => {
-      const reviewsData = await fetchReviews(hotelId, roomId);
-      setReviews(reviewsData);
+    if (!hotelId) return; // Only proceed if hotelId is provided
 
-      // Calculate average rating
-      if (reviewsData.length > 0) {
-        const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
-        setAverageRating((totalRating / reviewsData.length).toFixed(1));
-      } else {
+    const loadReviews = async () => {
+      try {
+        // For now, we're only fetching reviews by hotelId (fetchReviews in context doesn't support roomId)
+        const reviewsData = await fetchReviews(hotelId);
+        setReviews(reviewsData);
+
+        // Calculate average rating
+        if (reviewsData.length > 0) {
+          const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
+          setAverageRating((totalRating / reviewsData.length).toFixed(1));
+        } else {
+          setAverageRating(0);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        setReviews([]);
         setAverageRating(0);
       }
     };
 
-    // Only fetch if we have a hotelId or roomId
-    if (hotelId || roomId) {
-      loadReviews();
-    }
-  }, [hotelId, roomId, fetchReviews]);
+    loadReviews();
+  }, [hotelId]); // Removed fetchReviews from dependencies as it's stable due to useCallback
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -36,7 +42,9 @@ const Reviews = ({ hotelId, roomId = null }) => {
     ));
   };
 
-  if (loading) {
+  const reviewsLoading = contextLoading?.reviews || false;
+  
+  if (reviewsLoading) {
     return <div className="py-8 text-center">Loading reviews...</div>;
   }
 
