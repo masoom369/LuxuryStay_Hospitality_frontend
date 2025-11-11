@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PageNotFound } from "./components";
+import ProtectedRoute from "./context/ProtectedRoute";
 
 // Pages (Public)
 import {
@@ -85,74 +86,133 @@ const App = () => {
           {/* Dashboard Layout */}
           <Route element={<DashboardLayout />}>
             {/* Admin Routes */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/hotels" element={<HotelManagement />} />
-            <Route path="/admin/rooms" element={<RoomsManagement />} />
-            <Route path="/admin/contact" element={<ManageContactUs />} />
+            <Route path="/dashboard" element={
+               <ProtectedRoute allowedRoles={['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance', 'guest']}>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UserManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/hotels" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <HotelManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/rooms" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <RoomsManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/contact" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <ManageContactUs />
+              </ProtectedRoute>
+            } />
 
             {/* Guest Routes */}
-            <Route path="/guest/my-bookings" element={<MyBookingsPage />} />
-            <Route
-              path="/guest/booking-history"
-              element={<BookingHistoryManagement />}
-            />
-            <Route
-              path="/guest/service-requests"
-              element={<ServiceRequestsInterface />}
-            />
-            <Route
-              path="/guest/feedback"
-              element={<FeedbackSubmissionForm />}
-            />
-            <Route path="/guest/room-service" element={<InRoomServices />} />
+            <Route path="/guest/my-bookings" element={
+              <ProtectedRoute allowedRoles={['guest']}>
+                <MyBookingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/guest/booking-history" element={
+              <ProtectedRoute allowedRoles={['guest']}>
+                <BookingHistoryManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/guest/service-requests" element={
+              <ProtectedRoute allowedRoles={['guest']}>
+                <ServiceRequestsInterface />
+              </ProtectedRoute>
+            } />
+            <Route path="/guest/feedback" element={
+              <ProtectedRoute allowedRoles={['guest']}>
+                <FeedbackSubmissionForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/guest/room-service" element={
+              <ProtectedRoute allowedRoles={['guest']}>
+                <InRoomServices />
+              </ProtectedRoute>
+            } />
 
             {/* Manager Routes */}
-            <Route path="/manager/reporting" element={<ReportingDashboard />} />
-            <Route path="/manager/occupancy" element={<OccupancyReports />} />
-            <Route path="/manager/revenue" element={<RevenueReports />} />
-            <Route
-              path="/manager/feedback"
-              element={<GuestFeedbackAnalytics />}
-            />
-            <Route
-              path="/manager/performance"
-              element={<PerformanceMetricsDashboard />}
-            />
-            <Route
-              path="/manager/export"
-              element={<ExportReportsInterface />}
-            />
-            <Route
-              path="/manager/feedback-management"
-              element={<FeedbackManagement />}
-            />
+            <Route path="/manager/reporting" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <ReportingDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/occupancy" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <OccupancyReports />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/revenue" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <RevenueReports />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/feedback" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <GuestFeedbackAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/performance" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <PerformanceMetricsDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/export" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <ExportReportsInterface />
+              </ProtectedRoute>
+            } />
+            <Route path="/manager/feedback-management" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <FeedbackManagement />
+              </ProtectedRoute>
+            } />
 
             {/* Receptionist Routes */}
-            <Route
-              path="/receptionist/create-guest"
-              element={<CreateGuestAccount />}
-            />
-            <Route path="/receptionist/walk-in" element={<WalkInBooking />} />
-            <Route
-              path="/receptionist/room-availability"
-              element={<RoomAvailability />}
-            />
+            <Route path="/receptionist/create-guest" element={
+              <ProtectedRoute allowedRoles={['receptionist']}>
+                <CreateGuestAccount />
+              </ProtectedRoute>
+            } />
+            <Route path="/receptionist/walk-in" element={
+              <ProtectedRoute allowedRoles={['receptionist']}>
+                <WalkInBooking />
+              </ProtectedRoute>
+            } />
+            <Route path="/receptionist/room-availability" element={
+              <ProtectedRoute allowedRoles={['receptionist']}>
+                <RoomAvailability />
+              </ProtectedRoute>
+            } />
 
             {/* Housekeeping Routes */}
-            <Route
-              path="/housekeeping/tasks"
-              element={<HousekeepingTaskManagement />}
-            />
+            <Route path="/housekeeping/tasks" element={
+              <ProtectedRoute allowedRoles={['housekeeping']}>
+                <HousekeepingTaskManagement />
+              </ProtectedRoute>
+            } />
 
             {/* Maintenance Routes */}
-            <Route
-              path="/maintenance/issues"
-              element={<MaintenanceIssueManagement />}
-            />
+            <Route path="/maintenance/issues" element={
+              <ProtectedRoute allowedRoles={['maintenance']}>
+                <MaintenanceIssueManagement />
+              </ProtectedRoute>
+            } />
 
             {/* Shared Routes */}
-            <Route path="/account" element={<AccountPage />} />
+            <Route path="/account" element={
+              <ProtectedRoute allowedRoles={['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance', 'guest']}>
+                <AccountPage />
+              </ProtectedRoute>
+            } />
           </Route>
 
           {/* 404 Page */}
