@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 
 const Alert = ({ type, message, onClose, autoClose = false, autoCloseTime = 5000 }) => {
   useEffect(() => {
@@ -26,14 +27,25 @@ const Alert = ({ type, message, onClose, autoClose = false, autoCloseTime = 5000
     }
   };
 
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle className="text-green-500 w-5 h-5" />;
+      case 'error':
+        return <XCircle className="text-red-500 w-5 h-5" />;
+      case 'warning':
+        return <AlertTriangle className="text-yellow-500 w-5 h-5" />;
+      case 'info':
+      default:
+        return <Info className="text-blue-500 w-5 h-5" />;
+    }
+  };
+
   return (
     <div className={`p-4 ${getAlertStyles()} relative`}>
       <div className="flex">
         <div className="flex-shrink-0">
-          {type === 'success' && <span className="text-green-500">✓</span>}
-          {type === 'error' && <span className="text-red-500">✕</span>}
-          {type === 'warning' && <span className="text-yellow-500">⚠</span>}
-          {type === 'info' && <span className="text-blue-500">ℹ</span>}
+          {getIcon()}
         </div>
         <div className="ml-3">
           <p className="text-sm font-secondary">{message}</p>
@@ -45,7 +57,7 @@ const Alert = ({ type, message, onClose, autoClose = false, autoCloseTime = 5000
               className="inline-flex rounded-md p-1.5 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 transition-colors"
             >
               <span className="sr-only">Dismiss</span>
-              <span className="text-lg">×</span>
+              <XCircle className="w-5 h-5" />
             </button>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, Edit, Trash, MessageSquare, Search, Filter } from "lucide-react";
+import { Eye, Edit, Trash, MessageSquare, Search, Filter, X } from "lucide-react";
 import DataTable from "../../components/DataTable";
 import FilterTable from "../../components/FilterTable";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
@@ -166,9 +166,9 @@ const ManageContactUs = () => {
                   <h3 className="text-xl font-bold">Contact Details</h3>
                   <button 
                     onClick={() => setShowModalOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700 flex items-center"
                   >
-                    ✕
+                    <X size={24} />
                   </button>
                 </div>
                 

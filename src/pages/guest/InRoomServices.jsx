@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Coffee, Utensils, Car, Users, ShoppingCart, Star, Clock, MapPin } from "lucide-react";
+import { Coffee, Utensils, Car, Users, ShoppingCart, Star, Clock, MapPin, Shirt, Wrench, Phone, Newspaper, Footprints } from "lucide-react";
 
 const InRoomServices = () => {
   const [activeTab, setActiveTab] = useState('roomService');
@@ -19,12 +19,12 @@ const InRoomServices = () => {
   ];
 
   const additionalServices = [
-    { id: 1, name: 'Laundry Service', price: 15.00, description: 'Per bag of laundry', icon: '👕' },
-    { id: 2, name: 'Dry Cleaning', price: 12.00, description: 'Per item', icon: '👔' },
-    { id: 3, name: 'Ironing Service', price: 8.00, description: 'Per item', icon: '熨' },
-    { id: 4, name: 'Shoe Shine', price: 10.00, description: 'Per pair', icon: '👞' },
-    { id: 5, name: 'Wake-up Call', price: 0.00, description: 'Free service', icon: '⏰' },
-    { id: 6, name: 'Newspaper Delivery', price: 5.00, description: 'Daily newspaper', icon: '📰' }
+    { id: 1, name: 'Laundry Service', price: 15.00, description: 'Per bag of laundry', icon: <Shirt size={20} /> },
+    { id: 2, name: 'Dry Cleaning', price: 12.00, description: 'Per item', icon: <Wrench size={20} /> },
+    { id: 3, name: 'Ironing Service', price: 8.00, description: 'Per item', icon: <Wrench size={20} /> },
+    { id: 4, name: 'Shoe Shine', price: 10.00, description: 'Per pair', icon: <Footprints size={20} /> },
+    { id: 5, name: 'Wake-up Call', price: 0.00, description: 'Free service', icon: <Phone size={20} /> },
+    { id: 6, name: 'Newspaper Delivery', price: 5.00, description: 'Daily newspaper', icon: <Newspaper size={20} /> }
   ];
 
   const addToCart = (item) => {

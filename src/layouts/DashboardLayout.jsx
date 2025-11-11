@@ -3,9 +3,11 @@ import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import Footer from '../components/layout/Footer';
 import { Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAuth();
 
   useEffect(() => {
     const handleResize = () => {
@@ -19,10 +21,6 @@ const DashboardLayout = ({ children }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const logout = () => {
-    // your logout logic here
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden w-full">

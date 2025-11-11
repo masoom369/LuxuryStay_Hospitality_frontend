@@ -25,7 +25,6 @@ import UserManagement from "./pages/admin/UserManagement";
 import ManageContactUs from "./pages/admin/ManageContactUs";
 
 // Pages (Guest)
-import GuestDashboard from "./pages/guest/GuestDashboard";
 import MyBookingsPage from "./pages/guest/MyBookingsPage";
 import BookingHistoryManagement from "./pages/guest/BookingHistoryManagement";
 import ServiceRequestsInterface from "./pages/guest/ServiceRequestsInterface";
@@ -86,14 +85,13 @@ const App = () => {
           {/* Dashboard Layout */}
           <Route element={<DashboardLayout />}>
             {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/hotels" element={<HotelManagement />} />
             <Route path="/admin/rooms" element={<RoomsManagement />} />
             <Route path="/admin/contact" element={<ManageContactUs />} />
 
             {/* Guest Routes */}
-            <Route path="/guest/dashboard" element={<GuestDashboard />} />
             <Route path="/guest/my-bookings" element={<MyBookingsPage />} />
             <Route
               path="/guest/booking-history"

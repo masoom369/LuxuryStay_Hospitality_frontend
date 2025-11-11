@@ -27,7 +27,7 @@ const Header = ({ onToggleSidebar, logout }) => {
             <button
               onClick={() => {
                 logout();
-                navigate('/admin/dashboard');
+                navigate('/');
               }}
               className="text-gray-700 hover:text-accent font-secondary flex items-center gap-1"
             >

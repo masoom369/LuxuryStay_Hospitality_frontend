@@ -1,137 +1,151 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, Lock, MapPin, Calendar, CreditCard, Shield, Camera, Save, AlertCircle, Check, LogOut } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  MapPin,
+  Calendar,
+  CreditCard,
+  Shield,
+  Camera,
+  Save,
+  AlertCircle,
+  Check,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 
 const AccountPage = () => {
   const { user, updateProfile, changePassword, logout } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
+    username: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
     address: {
-      street: '',
-      city: '',
-      state: '',
-      country: '',
-      zipCode: ''
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      zipCode: "",
     },
     preferences: {
-      roomType: '',
-      bedType: '',
-      floor: '',
+      roomType: "",
+      bedType: "",
+      floor: "",
       smokingAllowed: false,
-      specialRequests: ''
+      specialRequests: "",
     },
     loyaltyPoints: 0,
-    totalStays: 0
+    totalStays: 0,
   });
   const [passwordForm, setPasswordForm] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('profile');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
     if (user) {
       setFormData({
-        username: user.username || '',
-        email: user.email || '',
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        phone: user.phone || '',
+        username: user.username || "",
+        email: user.email || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
         address: user.address || {
-          street: '',
-          city: '',
-          state: '',
-          country: 'USA',
-          zipCode: ''
+          street: "",
+          city: "",
+          state: "",
+          country: "USA",
+          zipCode: "",
         },
         preferences: user.preferences || {
-          roomType: '',
-          bedType: '',
-          floor: '',
+          roomType: "",
+          bedType: "",
+          floor: "",
           smokingAllowed: false,
-          specialRequests: ''
+          specialRequests: "",
         },
         loyaltyPoints: user.loyaltyPoints || 0,
-        totalStays: user.totalStays || 0
+        totalStays: user.totalStays || 0,
       });
     }
   }, [user]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (name.includes('.')) {
+
+    if (name.includes(".")) {
       // Handle nested object properties
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: type === 'checkbox' ? checked : value
-        }
+          [child]: type === "checkbox" ? checked : value,
+        },
       }));
-    } else if (type === 'checkbox') {
-      setFormData(prev => ({
+    } else if (type === "checkbox") {
+      setFormData((prev) => ({
         ...prev,
-        [name]: checked
+        [name]: checked,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       address: {
         ...prev.address,
-        [name]: value
-      }
+        [name]: value,
+      },
     }));
   };
 
   const handlePreferencesChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       preferences: {
         ...prev.preferences,
-        [name]: type === 'checkbox' ? checked : value
-      }
+        [name]: type === "checkbox" ? checked : value,
+      },
     }));
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordForm(prev => ({
+    setPasswordForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // Validate form data
       if (!formData.username || !formData.email) {
-        throw new Error('Username and email are required');
+        throw new Error("Username and email are required");
       }
 
       const result = await updateProfile({
@@ -141,16 +155,16 @@ const AccountPage = () => {
         lastName: formData.lastName,
         phone: formData.phone,
         address: formData.address,
-        preferences: formData.preferences
+        preferences: formData.preferences,
       });
 
       if (result.success) {
-        setSuccess('Profile updated successfully!');
+        setSuccess("Profile updated successfully!");
       } else {
-        throw new Error(result.message || 'Failed to update profile');
+        throw new Error(result.message || "Failed to update profile");
       }
     } catch (err) {
-      setError(err.message || 'Failed to update profile');
+      setError(err.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -159,17 +173,17 @@ const AccountPage = () => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // Validate form data
       if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        throw new Error('New passwords do not match');
+        throw new Error("New passwords do not match");
       }
 
       if (passwordForm.newPassword.length < 6) {
-        throw new Error('New password must be at least 6 characters');
+        throw new Error("New password must be at least 6 characters");
       }
 
       const result = await changePassword(
@@ -178,17 +192,17 @@ const AccountPage = () => {
       );
 
       if (result.success) {
-        setSuccess('Password changed successfully!');
+        setSuccess("Password changed successfully!");
         setPasswordForm({
-          oldPassword: '',
-          newPassword: '',
-          confirmPassword: ''
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
         });
       } else {
-        throw new Error(result.message || 'Failed to change password');
+        throw new Error(result.message || "Failed to change password");
       }
     } catch (err) {
-      setError(err.message || 'Failed to change password');
+      setError(err.message || "Failed to change password");
     } finally {
       setLoading(false);
     }
@@ -196,13 +210,44 @@ const AccountPage = () => {
 
   const handleLogout = () => {
     logout();
+    navigate("/");
+  };
+
+  const handleDeleteAccount = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      )
+    ) {
+      // In a real application, this would make an API call to delete the account
+      alert("Account deletion functionality would be implemented here.");
+    }
   };
 
   return (
     <div className="container mx-auto py-14 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between">
           <h2 className="text-2xl font-primary text-accent px-3">My Account</h2>
+          {/* Account Actions */}
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="bg-red-600 text-white hover:bg-red-700 transition-colors py-2 px-4 rounded-md flex items-center"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              className="bg-red-800 text-white hover:bg-red-900 transition-colors py-2 px-4 rounded-md flex items-center"
+            >
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Delete Account
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -222,11 +267,11 @@ const AccountPage = () => {
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-6">
           <button
-            onClick={() => setActiveTab('profile')}
+            onClick={() => setActiveTab("profile")}
             className={`py-3 px-6 font-medium text-sm border-b-2 ${
-              activeTab === 'profile'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              activeTab === "profile"
+                ? "border-accent text-accent"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             <div className="flex items-center">
@@ -235,11 +280,11 @@ const AccountPage = () => {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('password')}
+            onClick={() => setActiveTab("password")}
             className={`py-3 px-6 font-medium text-sm border-b-2 ${
-              activeTab === 'password'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              activeTab === "password"
+                ? "border-accent text-accent"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             <div className="flex items-center">
@@ -248,11 +293,11 @@ const AccountPage = () => {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('preferences')}
+            onClick={() => setActiveTab("preferences")}
             className={`py-3 px-6 font-medium text-sm border-b-2 ${
-              activeTab === 'preferences'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              activeTab === "preferences"
+                ? "border-accent text-accent"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             <div className="flex items-center">
@@ -263,7 +308,7 @@ const AccountPage = () => {
         </div>
 
         {/* Profile Tab */}
-        {activeTab === 'profile' && (
+        {activeTab === "profile" && (
           <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
             <h3 className="text-lg font-primary text-accent mb-4 flex items-center">
               <User className="w-5 h-5 mr-2" />
@@ -272,7 +317,9 @@ const AccountPage = () => {
             <form onSubmit={handleProfileUpdate} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Username
+                  </label>
                   <input
                     type="text"
                     name="username"
@@ -283,7 +330,9 @@ const AccountPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -294,7 +343,9 @@ const AccountPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
                   <input
                     type="text"
                     name="firstName"
@@ -304,7 +355,9 @@ const AccountPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
                   <input
                     type="text"
                     name="lastName"
@@ -316,7 +369,9 @@ const AccountPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
                 <input
                   type="tel"
                   name="phone"
@@ -334,7 +389,9 @@ const AccountPage = () => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Street Address
+                    </label>
                     <input
                       type="text"
                       name="street"
@@ -344,7 +401,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City
+                    </label>
                     <input
                       type="text"
                       name="city"
@@ -354,7 +413,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      State
+                    </label>
                     <input
                       type="text"
                       name="state"
@@ -364,7 +425,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country
+                    </label>
                     <input
                       type="text"
                       name="country"
@@ -374,7 +437,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP Code
+                    </label>
                     <input
                       type="text"
                       name="zipCode"
@@ -395,11 +460,15 @@ const AccountPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Loyalty Points</p>
-                    <p className="text-2xl font-bold text-accent">{formData.loyaltyPoints}</p>
+                    <p className="text-2xl font-bold text-accent">
+                      {formData.loyaltyPoints}
+                    </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Total Stays</p>
-                    <p className="text-2xl font-bold text-accent">{formData.totalStays}</p>
+                    <p className="text-2xl font-bold text-accent">
+                      {formData.totalStays}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -429,7 +498,7 @@ const AccountPage = () => {
         )}
 
         {/* Password Tab */}
-        {activeTab === 'password' && (
+        {activeTab === "password" && (
           <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
             <h3 className="text-lg font-primary text-accent mb-4 flex items-center">
               <Lock className="w-5 h-5 mr-2" />
@@ -438,7 +507,9 @@ const AccountPage = () => {
             <form onSubmit={handleChangePassword} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Password
+                  </label>
                   <input
                     type="password"
                     name="oldPassword"
@@ -450,7 +521,9 @@ const AccountPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password
+                  </label>
                   <input
                     type="password"
                     name="newPassword"
@@ -462,7 +535,9 @@ const AccountPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm New Password
+                  </label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -500,19 +575,24 @@ const AccountPage = () => {
         )}
 
         {/* Preferences Tab */}
-        {activeTab === 'preferences' && (
+        {activeTab === "preferences" && (
           <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
             <h3 className="text-lg font-primary text-accent mb-4 flex items-center">
               <Shield className="w-5 h-5 mr-2" />
               Account Preferences
             </h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleProfileUpdate(e);
-            }} className="space-y-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleProfileUpdate(e);
+              }}
+              className="space-y-6"
+            >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Room Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Preferred Room Type
+                  </label>
                   <select
                     name="roomType"
                     value={formData.preferences.roomType}
@@ -528,7 +608,9 @@ const AccountPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Bed Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Preferred Bed Type
+                  </label>
                   <select
                     name="bedType"
                     value={formData.preferences.bedType}
@@ -543,7 +625,9 @@ const AccountPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Floor</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Preferred Floor
+                  </label>
                   <select
                     name="floor"
                     value={formData.preferences.floor}
@@ -567,12 +651,17 @@ const AccountPage = () => {
                     onChange={handlePreferencesChange}
                     className="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
                   />
-                  <label htmlFor="smokingAllowed" className="ml-2 block text-sm text-gray-700">
+                  <label
+                    htmlFor="smokingAllowed"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
                     Smoking Allowed
                   </label>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Special Requests</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Special Requests
+                  </label>
                   <textarea
                     name="specialRequests"
                     value={formData.preferences.specialRequests}
@@ -585,15 +674,29 @@ const AccountPage = () => {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-between items-center">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white hover:bg-red-700 transition-colors py-2 px-4 rounded-md flex items-center"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </button>
+              <div className="flex justify-end">
+                {/* <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="bg-red-600 text-white hover:bg-red-700 transition-colors py-2 px-4 rounded-md flex items-center"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                        handleDeleteAccount();
+                      }
+                    }}
+                    className="bg-red-800 text-white hover:bg-red-900 transition-colors py-2 px-4 rounded-md flex items-center mt-2"
+                  >
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    Delete Account
+                  </button>
+                </div> */}
                 <button
                   type="submit"
                   disabled={loading}

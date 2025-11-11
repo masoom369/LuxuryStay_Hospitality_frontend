@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function FAQPage() {
@@ -107,13 +108,12 @@ export default function FAQPage() {
                   <span className="font-bold text-gray-700">
                     {faq.question}
                   </span>
-                  <span
+                  <ChevronDown 
                     className={`text-gray-500 transform transition-transform ${
                       open ? "rotate-180" : ""
                     }`}
-                  >
-                    ▼
-                  </span>
+                    size={20}
+                  />
                 </button>
                 {open && (
                   <div className="px-6 py-4 bg-white border-t">

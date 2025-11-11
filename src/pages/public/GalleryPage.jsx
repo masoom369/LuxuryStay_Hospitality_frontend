@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrollToTop } from "../../components";
 
 const GalleryImage = ({ src, alt, onClick }) => (
@@ -21,19 +22,19 @@ const Lightbox = ({ images, currentIndex, onClose, onNext, onPrev }) => (
       onClick={onClose}
       className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
     >
-      ✕
+      <X size={24} />
     </button>
     <button
       onClick={onPrev}
       className="absolute left-4 text-white text-2xl hover:text-gray-300"
     >
-      ‹
+      <ChevronLeft size={24} />
     </button>
     <button
       onClick={onNext}
       className="absolute right-4 text-white text-2xl hover:text-gray-300"
     >
-      ›
+      <ChevronRight size={24} />
     </button>
     <img
       src={images[currentIndex]}
