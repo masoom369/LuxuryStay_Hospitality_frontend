@@ -223,6 +223,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Delete account
+  const deleteAccount = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/users/${user._id}`); // Using the user ID from the auth context
+      
+      // Clear local storage and state
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      setToken(null);
+      delete api.defaults.headers.common['Authorization'];
+      
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Account deletion failed';
+      setError(message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Manual refresh function
   const refreshProfile = useCallback(async () => {
     try {
@@ -310,6 +334,7 @@ export const AuthProvider = ({ children }) => {
     getProfile,
     updateProfile,
     changePassword,
+    deleteAccount,
     forgotPassword,
     resetPassword,
     refreshProfile,

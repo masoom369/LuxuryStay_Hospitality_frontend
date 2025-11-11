@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 const AccountPage = () => {
-  const { user, updateProfile, changePassword, logout } = useAuth();
+  const { user, updateProfile, changePassword, logout, isGuest } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -292,19 +294,21 @@ const AccountPage = () => {
               Password
             </div>
           </button>
-          <button
-            onClick={() => setActiveTab("preferences")}
-            className={`py-3 px-6 font-medium text-sm border-b-2 ${
-              activeTab === "preferences"
-                ? "border-accent text-accent"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2" />
-              Preferences
-            </div>
-          </button>
+          {isGuest() && (
+            <button
+              onClick={() => setActiveTab("preferences")}
+              className={`py-3 px-6 font-medium text-sm border-b-2 ${
+                activeTab === "preferences"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 mr-2" />
+                Preferences
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Profile Tab */}
@@ -575,7 +579,7 @@ const AccountPage = () => {
         )}
 
         {/* Preferences Tab */}
-        {activeTab === "preferences" && (
+        {activeTab === "preferences" && isGuest() && (
           <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
             <h3 className="text-lg font-primary text-accent mb-4 flex items-center">
               <Shield className="w-5 h-5 mr-2" />
@@ -675,28 +679,6 @@ const AccountPage = () => {
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                {/* <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="bg-red-600 text-white hover:bg-red-700 transition-colors py-2 px-4 rounded-md flex items-center"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                        handleDeleteAccount();
-                      }
-                    }}
-                    className="bg-red-800 text-white hover:bg-red-900 transition-colors py-2 px-4 rounded-md flex items-center mt-2"
-                  >
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    Delete Account
-                  </button>
-                </div> */}
                 <button
                   type="submit"
                   disabled={loading}

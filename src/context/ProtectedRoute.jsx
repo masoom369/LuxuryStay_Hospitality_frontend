@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { CircularProgress, Box, Typography } from '@mui/material'; // Optional: for loading state
+import { Loader2 } from 'lucide-react';
 
 /**
  * ProtectedRoute Component
@@ -22,17 +22,10 @@ const ProtectedRoute = ({
   // Show loading spinner while checking auth status
   if (loading) {
     return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh' 
-        }}
-      >
-        <CircularProgress />
-        <Typography sx={{ ml: 2 }}>Authenticating...</Typography>
-      </Box>
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="animate-spin mr-2" size={24} />
+        <span>Authenticating...</span>
+      </div>
     );
   }
 
