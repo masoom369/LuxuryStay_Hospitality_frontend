@@ -22,3 +22,29 @@
 6. ✅ Update UserManagement.jsx button and table header colors
 7. ✅ Update UserManagement.jsx styling to match HotelManagement and RoomsManagement (consistent spacing, icons, layout)
 8. Test the updated components in browser to verify styling consistency
+
+# TODO: Remove MUI from ProtectedRoute.jsx and use lucide-react icons with Tailwind
+
+## Steps:
+1. ✅ Remove MUI imports (CircularProgress, Box, Typography)
+2. ✅ Add import for Loader2 from lucide-react
+3. ✅ Replace MUI loading component with Tailwind-styled div using Loader2 icon
+4. Test the loading state in the application
+
+# TODO: Make AccountPage preferences tab dynamic for guest roles only
+
+## Steps:
+1. ✅ Import useAuth from AuthContext in AccountPage.jsx
+2. ✅ Add isGuest check to conditionally render the preferences tab button
+3. ✅ Add isGuest check to conditionally render the preferences tab content
+4. Test the AccountPage to ensure preferences tab is only visible for guest users
+
+# TODO: Make all maintenance pages dynamic using DashboardContext
+
+## Steps:
+1. ✅ Update MaintenanceDashboard.jsx to use DashboardContext functions
+2. ✅ Update MaintenanceIssueManagement.jsx to use DashboardContext functions
+3. ✅ Add proper loading states and error handling
+4. ✅ Add fallback to mock data when API endpoints are not available
+5. Ensure data is filtered by user's assigned hotel
+6. Test the dynamic functionality
