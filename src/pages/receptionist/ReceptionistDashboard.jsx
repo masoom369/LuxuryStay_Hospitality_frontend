@@ -11,69 +11,133 @@ import {
 } from "recharts";
 import { Calendar, DoorOpen, Users, TrendingUp, UserPlus, UserCheck, Home } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useDashboardContext } from "../../context/DashboardContext";
 import api from "../../services/api";
-
-const mockCheckins = [
-  { day: "Mon", count: 5 },
-  { day: "Tue", count: 8 },
-  { day: "Wed", count: 6 },
-  { day: "Thu", count: 10 },
-  { day: "Fri", count: 12 },
-  { day: "Sat", count: 15 },
-  { day: "Sun", count: 14 },
-];
 
 const ReceptionistDashboard = () => {
   const [rooms, setRooms] = useState([]);
-  const [reservations, setReservations] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [stats, setStats] = useState({
+    totalRooms: 0,
+    occupancy: 0,
+    pendingCheckins: 0,
+    todaysCheckouts: 0
+  });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const { user } = useAuth();
+  const { 
+    recentReservations,
+    fetchRecentReservations,
+    fetchDashboardStats
+  } = useDashboardContext();
 
   // Get the hotel ID assigned to the receptionist
   const assignedHotelId = user?.assignments?.[0]?.hotel?._id || user?.assignments?.[0]?.hotel;
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!assignedHotelId) {
+        setError("No hotel assignment found");
+        setLoading(false);
+        return;
+      }
+
       try {
-        // In a real application, we'd filter by hotel ID
-        // For now, we'll fetch all data but in a real app, the backend would filter
-        const [roomsRes, reservationsRes] = await Promise.all([
-          api.get("/rooms"),
-          api.get("/reservations")
-        ]);
-        
-        // Filter data by assigned hotel
-        const hotelRooms = roomsRes.data.data.filter(room => room.hotel === assignedHotelId);
-        const hotelReservations = reservationsRes.data.data.filter(
-          reservation => {
-            // In a real app, we'd check if the reservation is for this hotel
-            // This would typically involve checking room.hotel === assignedHotelId
-            return true; // For now, we're using all data as a placeholder
-          }
+        setLoading(true);
+        setError(null);
+
+        // Fetch rooms data
+        const roomsRes = await api.get("/rooms");
+        const hotelRooms = roomsRes.data.data.filter(room => 
+          room.hotel === assignedHotelId || room.hotel?._id === assignedHotelId
         );
-        
         setRooms(hotelRooms);
-        setReservations(hotelReservations);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+
+        // Fetch recent reservations
+        await fetchRecentReservations(10);
+
+        // Calculate stats
+        const totalRooms = hotelRooms.length;
+        const occupied = hotelRooms.filter((r) => r.status === "occupied").length;
+        const occupancy = totalRooms ? ((occupied / totalRooms) * 100).toFixed(1) : 0;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const pendingCheckins = recentReservations.filter((r) => {
+          const checkInDate = new Date(r.checkInDate);
+          checkInDate.setHours(0, 0, 0, 0);
+          return r.status === "confirmed" && checkInDate >= today;
+        }).length;
+        
+        const todaysCheckouts = recentReservations.filter((r) => {
+          const checkOutDate = new Date(r.checkOutDate);
+          checkOutDate.setHours(0, 0, 0, 0);
+          const todayDate = new Date();
+          todayDate.setHours(0, 0, 0, 0);
+          return r.status === "checked-in" && checkOutDate.getTime() === todayDate.getTime();
+        }).length;
+
+        setStats({
+          totalRooms,
+          occupancy,
+          pendingCheckins,
+          todaysCheckouts
+        });
+
+        // Generate weekly check-in data
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (6 - i));
+          return date;
+        });
+
+        const weeklyStats = last7Days.map(date => {
+          const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+          const dateString = date.toDateString();
+          
+          const count = recentReservations.filter(reservation => {
+            if (!reservation.checkInDate) return false;
+            const checkInDate = new Date(reservation.checkInDate).toDateString();
+            return checkInDate === dateString && reservation.status === "checked-in";
+          }).length;
+
+          return { day: dayName, count };
+        });
+
+        setWeeklyData(weeklyStats);
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.response?.data?.message || "Failed to fetch dashboard data");
       } finally {
         setLoading(false);
       }
     };
 
-    if (assignedHotelId) {
-      fetchData();
-    }
-  }, [assignedHotelId]);
-
-  const totalRooms = rooms.length;
-  const occupied = rooms.filter((r) => r.status === "occupied").length;
-  const occupancy = totalRooms ? ((occupied / totalRooms) * 100).toFixed(1) : 0;
-  const pendingCheckins = reservations.filter((r) => r.status === "confirmed" && new Date(r.checkInDate) >= new Date()).length;
-  const todaysCheckouts = reservations.filter((r) => r.status === "checked-in" && new Date(r.checkOutDate).toDateString() === new Date().toDateString()).length;
+    fetchData();
+  }, [assignedHotelId, fetchRecentReservations]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto py-4 px-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading dashboard...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-4 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -87,7 +151,7 @@ const ReceptionistDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Total Rooms</p>
-              <p className="text-2xl font-primary">{totalRooms}</p>
+              <p className="text-2xl font-primary">{stats.totalRooms}</p>
             </div>
           </div>
 
@@ -97,7 +161,7 @@ const ReceptionistDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Occupancy</p>
-              <p className="text-2xl font-primary">{occupancy}%</p>
+              <p className="text-2xl font-primary">{stats.occupancy}%</p>
             </div>
           </div>
 
@@ -107,7 +171,7 @@ const ReceptionistDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Pending Check-ins</p>
-              <p className="text-2xl font-primary">{pendingCheckins}</p>
+              <p className="text-2xl font-primary">{stats.pendingCheckins}</p>
             </div>
           </div>
 
@@ -117,7 +181,7 @@ const ReceptionistDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Today's Check-outs</p>
-              <p className="text-2xl font-primary">{todaysCheckouts}</p>
+              <p className="text-2xl font-primary">{stats.todaysCheckouts}</p>
             </div>
           </div>
         </div>
@@ -127,7 +191,7 @@ const ReceptionistDashboard = () => {
           <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-primary mb-4">Check-ins – Last 7 Days</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={mockCheckins}>
+              <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
@@ -144,16 +208,22 @@ const ReceptionistDashboard = () => {
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-primary mb-4">Recent Bookings</h3>
-            <ul className="space-y-3">
-              {reservations.slice(0, 3).map((reservation) => (
-                <li key={reservation._id} className="flex justify-between text-sm font-secondary">
-                  <span className="font-medium">{reservation.guest?.username || 'Guest'}</span>
-                  <span className="text-gray-700">
-                    {reservation.room?.roomType || 'Room'} – {new Date(reservation.checkInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {recentReservations.length === 0 ? (
+              <p className="text-sm text-gray-500">No recent bookings</p>
+            ) : (
+              <ul className="space-y-3">
+                {recentReservations.slice(0, 3).map((reservation) => (
+                  <li key={reservation._id} className="flex justify-between text-sm font-secondary">
+                    <span className="font-medium">
+                      {reservation.guest?.username || reservation.guest?.profile?.firstName || 'Guest'}
+                    </span>
+                    <span className="text-gray-700">
+                      {reservation.room?.roomType || 'Room'} – {new Date(reservation.checkInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 

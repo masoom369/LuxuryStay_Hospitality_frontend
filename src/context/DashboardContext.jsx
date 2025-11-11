@@ -482,7 +482,7 @@ export const DashboardProvider = ({ children }) => {
   // Fetch service requests made by the guest
   const fetchGuestServiceRequests = useCallback(async () => {
     try {
-      const response = await api.get("/service-requests/guest");
+      const response = await api.get("/services/guest");
       return response.data.data || [];
     } catch (error) {
       throw new Error(handleError(error, "Failed to fetch service requests"));

@@ -35,10 +35,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, logout }) => {
     ],
     manager: [
       { path: "/dashboard", label: "Dashboard", icon: TrendingUp },
-      { path: "/manager/reporting", label: "Reporting", icon: TrendingUp },
-      { path: "/manager/occupancy", label: "Occupancy Reports", icon: Home },
-      { path: "/manager/revenue", label: "Revenue Reports", icon: CreditCard },
-      { path: "/manager/performance", label: "Performance", icon: TrendingUp },
+      // { path: "/manager/reporting", label: "Reporting", icon: TrendingUp },
+      // { path: "/manager/occupancy", label: "Occupancy Reports", icon: Home },
+      // { path: "/manager/revenue", label: "Revenue Reports", icon: CreditCard },
+      // { path: "/manager/performance", label: "Performance", icon: TrendingUp },
       {
         path: "/manager/feedback-management",
         label: "Feedback Management",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   BarChart,
   Bar,
@@ -8,69 +8,134 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie
+  ResponsiveContainer
 } from "recharts";
 import { 
   Star,
-  MessageCircle,
+  Download,
   TrendingUp, 
   TrendingDown,
-  Download,
-  Filter
+  Loader2
 } from "lucide-react";
+import { useDashboardContext } from "../../context/DashboardContext";
 
 const GuestFeedbackAnalytics = () => {
   const [timeRange, setTimeRange] = useState('month');
   const [filter, setFilter] = useState('all');
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const { fetchFeedbackAnalytics, exportReport } = useDashboardContext();
 
-  // Mock data for feedback analytics
-  const feedbackData = [
-    { date: "Nov 1", count: 8, average: 4.2 },
-    { date: "Nov 2", count: 12, average: 4.5 },
-    { date: "Nov 3", count: 10, average: 4.3 },
-    { date: "Nov 4", count: 15, average: 4.7 },
-    { date: "Nov 5", count: 18, average: 4.6 },
-    { date: "Nov 6", count: 14, average: 4.4 },
-    { date: "Nov 7", count: 16, average: 4.5 },
-  ];
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [timeRange, filter]);
 
-  const ratingDistribution = [
-    { name: "5 Star", count: 65, percentage: 45 },
-    { name: "4 Star", count: 42, percentage: 29 },
-    { name: "3 Star", count: 25, percentage: 17 },
-    { name: "2 Star", count: 10, percentage: 7 },
-    { name: "1 Star", count: 3, percentage: 2 },
-  ];
-
-  const categoryRatings = [
-    { category: "Cleanliness", rating: 4.7 },
-    { category: "Staff Service", rating: 4.6 },
-    { category: "Facilities", rating: 4.5 },
-    { category: "Location", rating: 4.8 },
-    { category: "Value for Money", rating: 4.3 },
-  ];
-
-  const feedbackByRoomType = [
-    { roomType: "Standard", average: 4.2, count: 32 },
-    { roomType: "Deluxe", average: 4.6, count: 28 },
-    { roomType: "Executive", average: 4.7, count: 22 },
-    { roomType: "Suite", average: 4.8, count: 15 },
-    { roomType: "Presidential", average: 4.9, count: 8 },
-  ];
-
-  const feedbackSummary = {
-    totalReviews: 145,
-    averageRating: 4.5,
-    positiveReviews: 122,
-    negativeReviews: 18,
-    responseRate: 92,
-    satisfaction: 94
+  const loadAnalyticsData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await fetchFeedbackAnalytics(timeRange, filter);
+      setAnalyticsData(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load feedback analytics');
+      console.error('Error loading feedback analytics:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleExport = async () => {
+    try {
+      const blob = await exportReport('feedback', 'pdf', { 
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), 
+        end: new Date().toISOString() 
+      }, { filter });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `feedback-analytics-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export report');
+    }
+  };
+
+  const defaultData = {
+    feedbackTrend: [
+      { date: "Nov 1", count: 8, average: 4.2 },
+      { date: "Nov 2", count: 12, average: 4.5 },
+      { date: "Nov 3", count: 10, average: 4.3 },
+      { date: "Nov 4", count: 15, average: 4.7 },
+      { date: "Nov 5", count: 18, average: 4.6 },
+      { date: "Nov 6", count: 14, average: 4.4 },
+      { date: "Nov 7", count: 16, average: 4.5 },
+    ],
+    ratingDistribution: [
+      { name: "5 Star", count: 65, percentage: 45 },
+      { name: "4 Star", count: 42, percentage: 29 },
+      { name: "3 Star", count: 25, percentage: 17 },
+      { name: "2 Star", count: 10, percentage: 7 },
+      { name: "1 Star", count: 3, percentage: 2 },
+    ],
+    categoryRatings: [
+      { category: "Cleanliness", rating: 4.7 },
+      { category: "Staff Service", rating: 4.6 },
+      { category: "Facilities", rating: 4.5 },
+      { category: "Location", rating: 4.8 },
+      { category: "Value for Money", rating: 4.3 },
+    ],
+    feedbackByRoomType: [
+      { roomType: "Standard", average: 4.2, count: 32 },
+      { roomType: "Deluxe", average: 4.6, count: 28 },
+      { roomType: "Executive", average: 4.7, count: 22 },
+      { roomType: "Suite", average: 4.8, count: 15 },
+      { roomType: "Presidential", average: 4.9, count: 8 },
+    ],
+    summary: {
+      totalReviews: 145,
+      averageRating: 4.5,
+      positiveReviews: 122,
+      negativeReviews: 18,
+      responseRate: 92,
+      satisfaction: 94
+    },
+    recentFeedback: [
+      { id: 1, guest: "John Smith", date: "Nov 7, 2023", rating: 5, comment: "Excellent service! The room was spotless and the staff was very helpful." },
+      { id: 2, guest: "Emily Johnson", date: "Nov 6, 2023", rating: 4, comment: "Great stay overall. The breakfast could be improved though." },
+      { id: 3, guest: "Michael Lee", date: "Nov 5, 2023", rating: 5, comment: "Outstanding experience! Would definitely recommend this hotel." },
+      { id: 4, guest: "Sarah Williams", date: "Nov 4, 2023", rating: 3, comment: "Good location, but room service was slow." },
+      { id: 5, guest: "David Brown", date: "Nov 3, 2023", rating: 4, comment: "Comfortable stay, nice amenities. Great value for money." }
+    ]
+  };
+
+  const data = analyticsData || defaultData;
   const COLORS = ['#a37d4c', '#b89a67', '#d4b98c', '#e6d5b8', '#f0e6d2'];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-14 px-4 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <span className="ml-2 text-gray-600">Loading feedback analytics...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-14 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-14 px-4">
@@ -100,7 +165,10 @@ const GuestFeedbackAnalytics = () => {
               <option value="staff">Staff Service</option>
               <option value="cleanliness">Cleanliness</option>
             </select>
-            <button className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md flex items-center">
+            <button 
+              onClick={handleExport}
+              className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md flex items-center"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
@@ -111,23 +179,23 @@ const GuestFeedbackAnalytics = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Total Reviews</p>
-            <p className="text-2xl font-bold text-accent">{feedbackSummary.totalReviews}</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.totalReviews || 0}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Average Rating</p>
-            <p className="text-2xl font-bold text-accent">{feedbackSummary.averageRating}/5</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.averageRating || 0}/5</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Positive</p>
-            <p className="text-2xl font-bold text-accent">{feedbackSummary.positiveReviews}</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.positiveReviews || 0}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Response Rate</p>
-            <p className="text-2xl font-bold text-accent">{feedbackSummary.responseRate}%</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.responseRate || 0}%</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Satisfaction</p>
-            <p className="text-2xl font-bold text-accent">{feedbackSummary.satisfaction}%</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.satisfaction || 0}%</p>
           </div>
         </div>
 
@@ -137,7 +205,7 @@ const GuestFeedbackAnalytics = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Feedback Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={feedbackData}>
+              <LineChart data={data.feedbackTrend || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis yAxisId="left" />
@@ -153,7 +221,7 @@ const GuestFeedbackAnalytics = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Rating Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={ratingDistribution}>
+              <BarChart data={data.ratingDistribution || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -169,7 +237,7 @@ const GuestFeedbackAnalytics = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Feedback by Category</h3>
             <div className="space-y-4">
-              {categoryRatings.map((category, index) => (
+              {(data.categoryRatings || []).map((category, index) => (
                 <div key={index}>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">{category.category}</span>
@@ -192,7 +260,7 @@ const GuestFeedbackAnalytics = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Feedback by Room Type</h3>
             <div className="space-y-4">
-              {feedbackByRoomType.map((room, index) => (
+              {(data.feedbackByRoomType || []).map((room, index) => (
                 <div key={index}>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">{room.roomType}</span>
@@ -220,13 +288,7 @@ const GuestFeedbackAnalytics = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
           <h3 className="text-lg font-primary text-accent mb-4">Recent Feedback</h3>
           <div className="space-y-4">
-            {[
-              { id: 1, guest: "John Smith", date: "Nov 7, 2023", rating: 5, comment: "Excellent service! The room was spotless and the staff was very helpful." },
-              { id: 2, guest: "Emily Johnson", date: "Nov 6, 2023", rating: 4, comment: "Great stay overall. The breakfast could be improved though." },
-              { id: 3, guest: "Michael Lee", date: "Nov 5, 2023", rating: 5, comment: "Outstanding experience! Would definitely recommend this hotel." },
-              { id: 4, guest: "Sarah Williams", date: "Nov 4, 2023", rating: 3, comment: "Good location, but room service was slow." },
-              { id: 5, guest: "David Brown", date: "Nov 3, 2023", rating: 4, comment: "Comfortable stay, nice amenities. Great value for money." }
-            ].map(feedback => (
+            {(data.recentFeedback || []).map(feedback => (
               <div key={feedback.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
                 <div className="flex justify-between items-start">
                   <div>
@@ -271,7 +333,7 @@ const GuestFeedbackAnalytics = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {categoryRatings.map((category, index) => (
+                {(data.categoryRatings || []).map((category, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.category}</td>
                     <td className="px-6 py-4 whitespace-nowrap">

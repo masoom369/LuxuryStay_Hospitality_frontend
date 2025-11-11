@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Calendar, User, CreditCard, MapPin, Clock, Star, CheckCircle } from "lucide-react";
+import { useDashboardContext } from "../../context/DashboardContext";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 
 const WalkInBooking = () => {
@@ -25,23 +27,60 @@ const WalkInBooking = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [reservationId, setReservationId] = useState('');
 
-  // Mock room data
-  const mockRooms = [
-    { id: 1, roomNumber: '101', roomType: 'Standard', bedType: 'Double', price: 150, amenities: ['WiFi', 'TV', 'AC'] },
-    { id: 2, roomNumber: '102', roomType: 'Deluxe', bedType: 'King', price: 250, amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Balcony'] },
-    { id: 3, roomNumber: '201', roomType: 'Executive', bedType: 'Queen', price: 300, amenities: ['WiFi', 'TV', 'AC', 'Safe', 'Kitchen'] },
-    { id: 4, roomNumber: '301', roomType: 'Suite', bedType: 'King', price: 500, amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Bathroom', 'Balcony'] },
-  ];
+  const { user } = useAuth();
+  const { createWalkInBooking, fetchRoomAvailability } = useDashboardContext();
+
+  const assignedHotelId = user?.assignments?.[0]?.hotel?._id || user?.assignments?.[0]?.hotel;
 
   useEffect(() => {
-    if (step === 2 && bookingInfo.checkInDate && bookingInfo.checkOutDate && bookingInfo.roomType) {
-      // Find available rooms based on date and type
-      setAvailableRooms(mockRooms.filter(room => 
-        room.roomType === bookingInfo.roomType
-      ));
-    }
-  }, [step, bookingInfo]);
+    const loadAvailableRooms = async () => {
+      if (step === 2 && bookingInfo.checkInDate && bookingInfo.checkOutDate && bookingInfo.roomType) {
+        try {
+          setLoading(true);
+          setError('');
+          
+          // Fetch available rooms for the selected dates and type
+          const rooms = await fetchRoomAvailability(
+            bookingInfo.checkInDate,
+            bookingInfo.roomType,
+            'available',
+            ''
+          );
+          
+          // Filter by assigned hotel
+          const hotelRooms = assignedHotelId 
+            ? rooms.filter(room => room.hotel === assignedHotelId || room.hotel?._id === assignedHotelId)
+            : rooms;
+          
+          setAvailableRooms(hotelRooms);
+        } catch (err) {
+          console.error('Error fetching available rooms:', err);
+          setError('Failed to fetch available rooms');
+          
+          // Fallback: fetch all available rooms
+          try {
+            const response = await api.get('/rooms', {
+              params: { status: 'available', roomType: bookingInfo.roomType }
+            });
+            const rooms = response.data.data || [];
+            const hotelRooms = assignedHotelId 
+              ? rooms.filter(room => room.hotel === assignedHotelId || room.hotel?._id === assignedHotelId)
+              : rooms;
+            setAvailableRooms(hotelRooms);
+            setError('');
+          } catch (fallbackErr) {
+            console.error('Fallback fetch failed:', fallbackErr);
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAvailableRooms();
+  }, [step, bookingInfo.checkInDate, bookingInfo.checkOutDate, bookingInfo.roomType, fetchRoomAvailability, assignedHotelId]);
 
   const handleGuestInfoChange = (e) => {
     const { name, value } = e.target;
@@ -74,6 +113,14 @@ const WalkInBooking = () => {
         setError('Please select check-out date and room');
         return;
       }
+      
+      const checkIn = new Date(bookingInfo.checkInDate);
+      const checkOut = new Date(bookingInfo.checkOutDate);
+      if (checkOut <= checkIn) {
+        setError('Check-out date must be after check-in date');
+        return;
+      }
+      
       setError('');
       setStep(3);
     } else if (step === 3) {
@@ -88,20 +135,40 @@ const WalkInBooking = () => {
     setSuccess('');
 
     try {
-      // Mock API call to create reservation
-      console.log('Creating walk-in reservation:', {
-        guestInfo,
-        bookingInfo,
-        selectedRoom
-      });
+      // Prepare booking data
+      const bookingData = {
+        guest: {
+          firstName: guestInfo.firstName,
+          lastName: guestInfo.lastName,
+          email: guestInfo.email,
+          phone: guestInfo.phone,
+          identification: {
+            type: guestInfo.idType,
+            number: guestInfo.idNumber
+          }
+        },
+        room: selectedRoom._id,
+        hotel: assignedHotelId,
+        checkInDate: bookingInfo.checkInDate,
+        checkOutDate: bookingInfo.checkOutDate,
+        numberOfGuests: bookingInfo.numberOfGuests,
+        specialRequests: bookingInfo.specialRequests,
+        paymentMethod: bookingInfo.paymentMethod,
+        status: 'confirmed',
+        source: 'walk-in'
+      };
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await createWalkInBooking(bookingData);
       
-      setSuccess('Walk-in booking confirmed successfully!');
-      setStep(4); // Show success step
+      if (response.success || response.data) {
+        const resId = response.data?._id || response.data?.reservationId || `RES${Math.floor(100000 + Math.random() * 900000)}`;
+        setReservationId(resId);
+        setSuccess('Walk-in booking confirmed successfully!');
+        setStep(4); // Show success step
+      }
     } catch (err) {
-      setError('Failed to create booking. Please try again.');
+      const errorMessage = err.message || 'Failed to create booking. Please try again.';
+      setError(errorMessage);
       console.error('Error creating booking:', err);
     } finally {
       setLoading(false);
@@ -129,6 +196,21 @@ const WalkInBooking = () => {
     setSelectedRoom(null);
     setError('');
     setSuccess('');
+    setReservationId('');
+  };
+
+  const calculateNights = () => {
+    if (!bookingInfo.checkInDate || !bookingInfo.checkOutDate) return 1;
+    const checkIn = new Date(bookingInfo.checkInDate);
+    const checkOut = new Date(bookingInfo.checkOutDate);
+    const diffTime = Math.abs(checkOut - checkIn);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(1, diffDays);
+  };
+
+  const calculateTotal = () => {
+    if (!selectedRoom) return 0;
+    return selectedRoom.pricePerNight * calculateNights();
   };
 
   return (
@@ -279,7 +361,7 @@ const WalkInBooking = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Check-in Date *</label>
                   <input
                     type="date"
                     name="checkInDate"
@@ -290,7 +372,7 @@ const WalkInBooking = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Check-out Date *</label>
                   <input
                     type="date"
                     name="checkOutDate"
@@ -301,7 +383,7 @@ const WalkInBooking = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Room Type *</label>
                   <select
                     name="roomType"
                     value={bookingInfo.roomType}
@@ -317,7 +399,7 @@ const WalkInBooking = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Number of Guests</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Number of Guests *</label>
                   <select
                     name="numberOfGuests"
                     value={bookingInfo.numberOfGuests}
@@ -344,15 +426,17 @@ const WalkInBooking = () => {
               </div>
 
               {/* Available Rooms */}
-              {availableRooms.length > 0 && (
+              {loading && <p className="text-gray-600">Loading available rooms...</p>}
+              
+              {!loading && availableRooms.length > 0 && (
                 <div>
                   <h4 className="text-lg font-primary text-accent mb-4">Available Rooms</h4>
                   <div className="space-y-3">
                     {availableRooms.map(room => (
                       <div 
-                        key={room.id} 
+                        key={room._id} 
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          selectedRoom?.id === room.id 
+                          selectedRoom?._id === room._id 
                             ? 'border-accent bg-accent/5' 
                             : 'border-gray-300 hover:border-accent'
                         }`}
@@ -362,22 +446,28 @@ const WalkInBooking = () => {
                           <div>
                             <h5 className="font-medium text-gray-900">Room {room.roomNumber} - {room.roomType}</h5>
                             <p className="text-sm text-gray-600">{room.bedType} Bed</p>
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {room.amenities.map(amenity => (
-                                <span key={amenity} className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1">
-                                  {amenity}
-                                </span>
-                              ))}
-                            </div>
+                            {room.amenities && room.amenities.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {room.amenities.map(amenity => (
+                                  <span key={amenity} className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs text-gray-700">
+                                    {amenity}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-accent">${room.price}/night</p>
+                            <p className="font-bold text-accent">${room.pricePerNight}/night</p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
+              )}
+              
+              {!loading && bookingInfo.roomType && availableRooms.length === 0 && (
+                <p className="text-red-600">No available rooms found for the selected criteria</p>
               )}
             </div>
           )}
@@ -403,29 +493,25 @@ const WalkInBooking = () => {
                   </div>
                   <div>
                     <p className="text-gray-600">Check-in:</p>
-                    <p className="font-medium">{bookingInfo.checkInDate}</p>
+                    <p className="font-medium">{new Date(bookingInfo.checkInDate).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Check-out:</p>
-                    <p className="font-medium">{bookingInfo.checkOutDate}</p>
+                    <p className="font-medium">{new Date(bookingInfo.checkOutDate).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Nights:</p>
-                    <p className="font-medium">
-                      {Math.max(1, new Date(bookingInfo.checkOutDate) - new Date(bookingInfo.checkInDate)) / (1000 * 60 * 60 * 24) || 1}
-                    </p>
+                    <p className="font-medium">{calculateNights()}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Total:</p>
-                    <p className="font-bold text-accent">
-                      ${selectedRoom.price * (Math.max(1, new Date(bookingInfo.checkOutDate) - new Date(bookingInfo.checkInDate)) / (1000 * 60 * 60 * 24) || 1)}
-                    </p>
+                    <p className="font-bold text-accent">${calculateTotal()}</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
                 <select
                   name="paymentMethod"
                   value={bookingInfo.paymentMethod}
@@ -453,17 +539,18 @@ const WalkInBooking = () => {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
                 <h4 className="font-medium text-gray-900 mb-2">Reservation Details</h4>
-                <p className="text-sm text-gray-600">Reservation ID: RES{Math.floor(100000 + Math.random() * 900000)}</p>
+                <p className="text-sm text-gray-600">Reservation ID: {reservationId}</p>
                 <p className="text-sm text-gray-600">Room: {selectedRoom?.roomNumber}</p>
-                <p className="text-sm text-gray-600">Check-in: {bookingInfo.checkInDate}</p>
-                <p className="text-sm text-gray-600">Check-out: {bookingInfo.checkOutDate}</p>
+                <p className="text-sm text-gray-600">Check-in: {new Date(bookingInfo.checkInDate).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-600">Check-out: {new Date(bookingInfo.checkOutDate).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-600">Total: ${calculateTotal()}</p>
               </div>
             </div>
           )}
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-8">
-            {step > 1 && step < 4 && step !== 4 && (
+            {step > 1 && step < 4 && (
               <button
                 onClick={() => setStep(step - 1)}
                 className="bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors py-2 px-6 rounded-md"
@@ -476,11 +563,10 @@ const WalkInBooking = () => {
               <button
                 onClick={handleNextStep}
                 disabled={loading}
-                className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-6 rounded-md ml-auto disabled:opacity-50"
+                className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-6 rounded-md ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Processing...' : 
-                 step === 3 ? 'Confirm Booking' : 
-                 step === 4 ? 'Finish' : 'Next'}
+                 step === 3 ? 'Confirm Booking' : 'Next'}
               </button>
             )}
           </div>

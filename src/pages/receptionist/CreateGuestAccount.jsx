@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserPlus, Calendar, CreditCard, MapPin, Mail, Phone, Home } from "lucide-react";
-import api from "../../services/api";
+import { useDashboardContext } from "../../context/DashboardContext";
 
 const CreateGuestAccount = () => {
   const [formData, setFormData] = useState({
@@ -32,11 +32,12 @@ const CreateGuestAccount = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const { createGuestAccount } = useDashboardContext();
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
     if (name.includes('.')) {
-      // Handle nested object properties
       const [parent, child] = name.split('.');
       setFormData(prev => ({
         ...prev,
@@ -88,47 +89,73 @@ const CreateGuestAccount = () => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      // Mock API call - in a real application, this would be an API call
-      console.log('Creating guest account:', formData);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Reset form
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
-        address: {
-          street: '',
-          city: '',
-          state: '',
-          country: 'USA',
-          zipCode: ''
+      // Prepare data for API
+      const guestData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: 'guest',
+        profile: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          address: formData.address,
+          identification: {
+            type: formData.idType,
+            number: formData.idNumber
+          }
         },
-        idType: 'passport',
-        idNumber: '',
-        preferences: {
-          roomType: '',
-          bedType: '',
-          floor: '',
-          smokingAllowed: false,
-          specialRequests: ''
-        }
-      });
+        preferences: formData.preferences
+      };
+
+      const response = await createGuestAccount(guestData);
       
-      setSuccess('Guest account created successfully!');
+      if (response.success || response.data) {
+        setSuccess(`Guest account created successfully! Username: ${formData.username}`);
+        
+        // Reset form after 2 seconds
+        setTimeout(() => {
+          setFormData({
+            username: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            firstName: '',
+            lastName: '',
+            phone: '',
+            address: {
+              street: '',
+              city: '',
+              state: '',
+              country: 'USA',
+              zipCode: ''
+            },
+            idType: 'passport',
+            idNumber: '',
+            preferences: {
+              roomType: '',
+              bedType: '',
+              floor: '',
+              smokingAllowed: false,
+              specialRequests: ''
+            }
+          });
+          setSuccess('');
+        }, 3000);
+      }
     } catch (err) {
-      setError('Failed to create guest account. Please try again.');
+      const errorMessage = err.message || 'Failed to create guest account. Please try again.';
+      setError(errorMessage);
       console.error('Error creating guest account:', err);
     } finally {
       setLoading(false);
@@ -164,7 +191,7 @@ const CreateGuestAccount = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
                   <input
                     type="text"
                     name="firstName"
@@ -175,7 +202,7 @@ const CreateGuestAccount = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
                   <input
                     type="text"
                     name="lastName"
@@ -186,7 +213,7 @@ const CreateGuestAccount = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                   <input
                     type="email"
                     name="email"
@@ -204,6 +231,7 @@ const CreateGuestAccount = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
+                    placeholder="+1234567890"
                   />
                 </div>
               </div>
@@ -217,7 +245,7 @@ const CreateGuestAccount = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
                   <input
                     type="text"
                     name="username"
@@ -225,10 +253,11 @@ const CreateGuestAccount = () => {
                     onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
                     required
+                    minLength={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                   <input
                     type="password"
                     name="password"
@@ -236,10 +265,12 @@ const CreateGuestAccount = () => {
                     onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
                     required
+                    minLength={6}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -247,6 +278,7 @@ const CreateGuestAccount = () => {
                     onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
                     required
+                    minLength={6}
                   />
                 </div>
               </div>
@@ -431,7 +463,7 @@ const CreateGuestAccount = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-accent text-white hover:bg-accent/90 transition-colors py-3 px-8 rounded-md tracking-widest disabled:opacity-50"
+                className="bg-accent text-white hover:bg-accent/90 transition-colors py-3 px-8 rounded-md tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating Account...' : 'Create Guest Account'}
               </button>

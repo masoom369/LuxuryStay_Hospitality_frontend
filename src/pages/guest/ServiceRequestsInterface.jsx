@@ -1,62 +1,30 @@
 import { useState, useEffect } from "react";
-import { Clock, CheckCircle, AlertCircle, User, Phone, Calendar, MessageCircle } from "lucide-react";
+import { Clock, CheckCircle, AlertCircle, MessageCircle, Loader, Plus, X } from "lucide-react";
 import DataTable from "../../components/DataTable";
 import FilterTable from "../../components/FilterTable";
+import { useDashboardContext } from "../../context/DashboardContext";
 
 const ServiceRequestsInterface = () => {
-  const [requests, setRequests] = useState([
-    {
-      _id: 1,
-      requestId: 'SRQ001',
-      serviceType: 'Room Service',
-      description: 'Order breakfast for room 301',
-      priority: 'High',
-      status: 'completed',
-      requestedAt: '2023-11-05T10:30:00',
-      completedAt: '2023-11-05T11:15:00',
-      assignedTo: 'John Smith'
-    },
-    {
-      _id: 2,
-      requestId: 'SRQ002',
-      serviceType: 'Housekeeping',
-      description: 'Extra towels and toiletries needed',
-      priority: 'Medium',
-      status: 'in-progress',
-      requestedAt: '2023-11-06T14:45:00',
-      assignedTo: 'Maria Garcia'
-    },
-    {
-      _id: 3,
-      requestId: 'SRQ003',
-      serviceType: 'Maintenance',
-      description: 'Air conditioning not working in room 205',
-      priority: 'High',
-      status: 'pending',
-      requestedAt: '2023-11-06T09:20:00',
-      assignedTo: 'Available'
-    },
-    {
-      _id: 4,
-      requestId: 'SRQ004',
-      serviceType: 'Wake-up Call',
-      description: 'Wake-up call at 6:30 AM on Nov 7th',
-      priority: 'Low',
-      status: 'completed',
-      requestedAt: '2023-11-06T20:00:00',
-      completedAt: '2023-11-07T06:30:00',
-      assignedTo: 'Front Desk'
-    }
-  ]);
-  const [filteredRequests, setFilteredRequests] = useState(requests);
+  const {
+    fetchGuestServiceRequests,
+    submitServiceRequest,
+    cancelServiceRequest,
+    trackServiceRequest,
+    loading
+  } = useDashboardContext();
+
+  const [requests, setRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({
     serviceType: '',
     description: '',
     priority: 'Medium'
   });
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [trackingModal, setTrackingModal] = useState(null);
 
   const serviceTypes = [
     'Room Service', 'Housekeeping', 'Maintenance', 'Wake-up Call', 
@@ -64,15 +32,27 @@ const ServiceRequestsInterface = () => {
   ];
 
   useEffect(() => {
-    setFilteredRequests(requests);
-  }, [requests]);
+    loadServiceRequests();
+  }, []);
+
+  const loadServiceRequests = async () => {
+    try {
+      setError(null);
+      const data = await fetchGuestServiceRequests();
+      setRequests(data);
+      setFilteredRequests(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching service requests:', err);
+    }
+  };
 
   const handleFilter = (query) => {
     if (query) {
       setFilteredRequests(requests.filter(request => 
-        request.requestId.toLowerCase().includes(query.toLowerCase()) ||
-        request.serviceType.toLowerCase().includes(query.toLowerCase()) ||
-        request.description.toLowerCase().includes(query.toLowerCase())
+        request.requestId?.toLowerCase().includes(query.toLowerCase()) ||
+        request.serviceType?.toLowerCase().includes(query.toLowerCase()) ||
+        request.description?.toLowerCase().includes(query.toLowerCase())
       ));
     } else {
       setFilteredRequests(requests);
@@ -87,32 +67,153 @@ const ServiceRequestsInterface = () => {
     }));
   };
 
-  const handleSubmitRequest = (e) => {
+  const handleSubmitRequest = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
+    setError(null);
     
-    // In a real application, this would make an API call
-    const requestToAdd = {
-      _id: requests.length + 1,
-      requestId: `SRQ00${requests.length + 1}`,
-      ...newRequest,
-      status: 'pending',
-      requestedAt: new Date().toISOString(),
-      assignedTo: 'Available'
+    try {
+      await submitServiceRequest(newRequest);
+      setNewRequest({ serviceType: '', description: '', priority: 'Medium' });
+      setShowForm(false);
+      await loadServiceRequests();
+      alert('Service request submitted successfully!');
+    } catch (err) {
+      setError(err.message);
+      alert('Failed to submit service request: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelRequest = async (request) => {
+    if (request.status === 'completed' || request.status === 'cancelled') {
+      alert('Cannot cancel a completed or already cancelled request.');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to cancel this service request?')) {
+      try {
+        setActionLoading(request._id);
+        setError(null);
+        await cancelServiceRequest(request._id);
+        await loadServiceRequests();
+        alert('Service request cancelled successfully.');
+      } catch (err) {
+        setError(err.message);
+        alert('Failed to cancel service request: ' + err.message);
+      } finally {
+        setActionLoading(null);
+      }
+    }
+  };
+
+  const handleTrackRequest = async (request) => {
+    try {
+      setActionLoading(request._id);
+      setError(null);
+      const trackingData = await trackServiceRequest(request._id);
+      setTrackingModal(trackingData);
+    } catch (err) {
+      setError(err.message);
+      alert('Failed to track service request: ' + err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      completed: { bg: 'bg-green-100', text: 'text-green-800' },
+      'in-progress': { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+      pending: { bg: 'bg-blue-100', text: 'text-blue-800' },
+      cancelled: { bg: 'bg-red-100', text: 'text-red-800' }
     };
     
-    setRequests(prev => [requestToAdd, ...prev]);
-    setNewRequest({ serviceType: '', description: '', priority: 'Medium' });
-    setShowForm(false);
-    setLoading(false);
+    const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+    return `${config.bg} ${config.text}`;
   };
 
-  const handleCancelRequest = (request) => {
-    console.log('Cancel request:', request);
+  const getPriorityBadge = (priority) => {
+    const priorityConfig = {
+      High: { bg: 'bg-red-100', text: 'text-red-800' },
+      Medium: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+      Low: { bg: 'bg-blue-100', text: 'text-blue-800' }
+    };
+    
+    const config = priorityConfig[priority] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+    return `${config.bg} ${config.text}`;
   };
 
-  const handleTrackRequest = (request) => {
-    console.log('Track request:', request);
+  const TrackingModal = ({ data, onClose }) => {
+    if (!data) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-primary text-accent">Request Tracking</h3>
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Request ID</p>
+                <p className="font-medium">{data.requestId || data._id}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Status</p>
+                <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadge(data.status)}`}>
+                  {data.status.charAt(0).toUpperCase() + data.status.slice(1).replace('-', ' ')}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Service Type</p>
+                <p className="font-medium">{data.serviceType}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Priority</p>
+                <span className={`px-2 py-1 rounded-full text-xs ${getPriorityBadge(data.priority)}`}>
+                  {data.priority}
+                </span>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-gray-600">Description</p>
+                <p className="font-medium">{data.description}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Requested At</p>
+                <p className="font-medium">{new Date(data.requestedAt || data.createdAt).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Assigned To</p>
+                <p className="font-medium">{data.assignedTo?.username || data.assignedTo || 'Pending Assignment'}</p>
+              </div>
+              {data.completedAt && (
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-600">Completed At</p>
+                  <p className="font-medium">{new Date(data.completedAt).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-gray-200 flex justify-end">
+            <button
+              onClick={onClose}
+              className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-6 rounded-md"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -122,11 +223,28 @@ const ServiceRequestsInterface = () => {
           <h2 className="text-2xl font-primary text-accent px-3">Service Requests</h2>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-accent text-white hover:bg-accent/90 transition-colors py-3 px-8 rounded-md tracking-widest"
+            className="bg-accent text-white hover:bg-accent/90 transition-colors py-3 px-8 rounded-md tracking-widest flex items-center"
           >
-            {showForm ? 'Cancel Request' : 'New Request'}
+            {showForm ? (
+              <>
+                <X size={16} className="mr-2" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Plus size={16} className="mr-2" />
+                New Request
+              </>
+            )}
           </button>
         </div>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
+            <AlertCircle className="mr-2" size={20} />
+            <span>{error}</span>
+          </div>
+        )}
 
         {showForm && (
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
@@ -134,7 +252,9 @@ const ServiceRequestsInterface = () => {
             <form onSubmit={handleSubmitRequest} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service Type <span className="text-red-500">*</span>
+                  </label>
                   <select
                     name="serviceType"
                     value={newRequest.serviceType}
@@ -149,7 +269,9 @@ const ServiceRequestsInterface = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Priority <span className="text-red-500">*</span>
+                  </label>
                   <select
                     name="priority"
                     value={newRequest.priority}
@@ -163,24 +285,33 @@ const ServiceRequestsInterface = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description <span className="text-red-500">*</span>
+                </label>
                 <textarea
                   name="description"
                   value={newRequest.description}
                   onChange={handleInputChange}
                   rows={3}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-accent focus:border-accent"
-                  placeholder="Describe your service request..."
+                  placeholder="Describe your service request in detail..."
                   required
                 />
               </div>
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-6 rounded-md disabled:opacity-50"
+                  disabled={submitting}
+                  className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-6 rounded-md disabled:opacity-50 flex items-center"
                 >
-                  {loading ? 'Submitting...' : 'Submit Request'}
+                  {submitting ? (
+                    <>
+                      <Loader className="animate-spin mr-2" size={16} />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Request'
+                  )}
                 </button>
               </div>
             </form>
@@ -191,31 +322,46 @@ const ServiceRequestsInterface = () => {
 
         <DataTable
           columns={[
-            { key: 'requestId', label: 'Request ID' },
+            { 
+              key: 'requestId', 
+              label: 'Request ID',
+              render: (request) => request.requestId || request._id
+            },
             { key: 'serviceType', label: 'Service Type' },
-            { key: 'description', label: 'Description' },
-            { key: 'priority', label: 'Priority' },
+            { 
+              key: 'description', 
+              label: 'Description',
+              render: (request) => (
+                <span className="truncate block max-w-xs" title={request.description}>
+                  {request.description}
+                </span>
+              )
+            },
+            { 
+              key: 'priority', 
+              label: 'Priority',
+              render: (request) => (
+                <span className={`px-2 py-1 rounded-full text-xs ${getPriorityBadge(request.priority)}`}>
+                  {request.priority}
+                </span>
+              )
+            },
             { 
               key: 'requestedAt', 
               label: 'Requested', 
-              render: (request) => new Date(request.requestedAt).toLocaleString() 
+              render: (request) => new Date(request.requestedAt || request.createdAt).toLocaleString() 
             },
             { 
               key: 'assignedTo', 
               label: 'Assigned To',
-              render: (request) => request.assignedTo
+              render: (request) => request.assignedTo?.username || request.assignedTo || 'Pending'
             },
             { 
               key: 'status', 
               label: 'Status',
               render: (request) => (
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  request.status === 'completed' ? 'bg-green-100 text-green-800' :
-                  request.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                  request.status === 'pending' ? 'bg-blue-100 text-blue-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadge(request.status)}`}>
+                  {request.status.charAt(0).toUpperCase() + request.status.slice(1).replace('-', ' ')}
                 </span>
               )
             }
@@ -223,28 +369,33 @@ const ServiceRequestsInterface = () => {
           data={filteredRequests}
           actions={[
             { 
-              icon: <Clock size={16} />, 
+              icon: actionLoading ? <Loader className="animate-spin" size={16} /> : <Clock size={16} />, 
               onClick: handleTrackRequest, 
               className: 'text-accent hover:underline',
-              tooltip: 'Track Request'
+              tooltip: 'Track Request',
+              disabled: (request) => actionLoading === request._id
             },
             { 
-              icon: <MessageCircle size={16} />, 
-              onClick: (request) => console.log('Message for request:', request), 
-              className: 'text-accent hover:underline',
-              tooltip: 'Message Staff'
-            },
-            { 
-              icon: <AlertCircle size={16} />, 
-              onClick: (request) => handleCancelRequest(request), 
+              icon: actionLoading ? <Loader className="animate-spin" size={16} /> : <AlertCircle size={16} />, 
+              onClick: handleCancelRequest, 
               className: 'text-red-600 hover:underline',
-              tooltip: 'Cancel Request'
+              tooltip: 'Cancel Request',
+              disabled: (request) => 
+                ['completed', 'cancelled'].includes(request.status) || 
+                actionLoading === request._id
             }
           ]}
-          loading={loading}
-          error={error}
+          loading={loading.reservations}
+          error={null}
           emptyMessage="No service requests found."
         />
+
+        {trackingModal && (
+          <TrackingModal
+            data={trackingModal}
+            onClose={() => setTrackingModal(null)}
+          />
+        )}
       </div>
     </div>
   );

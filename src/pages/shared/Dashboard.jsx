@@ -5,6 +5,7 @@ import ReceptionistDashboard from "../receptionist/ReceptionistDashboard";
 import HousekeepingDashboard from "../housekeeping/HousekeepingDashboard";
 import MaintenanceDashboard from "../maintenance/MaintenanceDashboard";
 import GuestDashboard from "../guest/GuestDashboard";
+import PerformanceMetricsDashboard from "../manager/PerformanceMetricsDashboard";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ export default function Dashboard() {
   if (user?.role === 'admin') {
     return <AdminDashboard />;
   } else if (user?.role === 'manager') {
-    return <ManagerDashboard />;
+    return <PerformanceMetricsDashboard />;
   } else if (user?.role === 'receptionist') {
     return <ReceptionistDashboard />;
   } else if (user?.role === 'housekeeping') {

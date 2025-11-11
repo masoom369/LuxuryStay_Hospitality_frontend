@@ -11,74 +11,128 @@ import {
 } from "recharts";
 import { Calendar, DoorOpen, Users, TrendingUp, CheckCircle, Clock, AlertCircle, Home } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useDashboardContext } from "../../context/DashboardContext";
 import api from "../../services/api";
-
-const mockCleaning = [
-  { day: "Mon", cleaned: 12 },
-  { day: "Tue", cleaned: 15 },
-  { day: "Wed", cleaned: 10 },
-  { day: "Thu", cleaned: 18 },
-  { day: "Fri", cleaned: 20 },
-  { day: "Sat", cleaned: 25 },
-  { day: "Sun", cleaned: 22 },
-];
 
 const HousekeepingDashboard = () => {
   const [rooms, setRooms] = useState([]);
-  const [housekeeping, setHousekeeping] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [stats, setStats] = useState({
+    totalRooms: 0,
+    roomsToClean: 0,
+    inProgress: 0,
+    cleanedToday: 0
+  });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const { user } = useAuth();
+  const { 
+    housekeepingTasks, 
+    fetchHousekeepingTasks, 
+    fetchHousekeepingStats 
+  } = useDashboardContext();
 
   // Get the hotel ID assigned to the housekeeping staff
   const assignedHotelId = user?.assignments?.[0]?.hotel?._id || user?.assignments?.[0]?.hotel;
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!assignedHotelId) {
+        setError("No hotel assignment found");
+        setLoading(false);
+        return;
+      }
+
       try {
-        // In a real application, we'd filter by hotel ID
-        // For now, we'll fetch all data but in a real app, the backend would filter
-        const [roomsRes, housekeepingRes] = await Promise.all([
-          api.get("/rooms"),
-          api.get("/housekeeping")
-        ]);
-        
-        // Filter data by assigned hotel
-        const hotelRooms = roomsRes.data.data.filter(room => room.hotel === assignedHotelId);
-        const hotelHousekeeping = housekeepingRes.data.data.filter(
-          hk => {
-            // In a real app, we'd check if the housekeeping task is for this hotel
-            // This would typically involve checking room.hotel === assignedHotelId
-            return true; // For now, we're using all data as a placeholder
-          }
+        setLoading(true);
+        setError(null);
+
+        // Fetch rooms data
+        const roomsRes = await api.get("/rooms");
+        const hotelRooms = roomsRes.data.data.filter(room => 
+          room.hotel === assignedHotelId || room.hotel?._id === assignedHotelId
         );
-        
         setRooms(hotelRooms);
-        setHousekeeping(hotelHousekeeping);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+
+        // Fetch housekeeping tasks for this hotel
+        await fetchHousekeepingTasks();
+
+        // Fetch housekeeping stats
+        const statsData = await fetchHousekeepingStats();
+        
+        // Calculate stats
+        const totalRooms = hotelRooms.length;
+        const occupied = hotelRooms.filter((r) => r.status === "occupied").length;
+        const roomsToClean = hotelRooms.filter((r) => r.status === "needs-cleaning").length;
+        
+        const today = new Date().toDateString();
+        const cleanedToday = housekeepingTasks.filter((h) => 
+          h.completionTime && 
+          new Date(h.completionTime).toDateString() === today &&
+          h.status === "completed"
+        ).length;
+        
+        const inProgress = housekeepingTasks.filter((h) => h.status === "in-progress").length;
+
+        setStats({
+          totalRooms,
+          roomsToClean,
+          inProgress,
+          cleanedToday
+        });
+
+        // Generate weekly data from actual housekeeping tasks
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (6 - i));
+          return date;
+        });
+
+        const weeklyStats = last7Days.map(date => {
+          const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+          const dateString = date.toDateString();
+          
+          const cleaned = housekeepingTasks.filter(task => {
+            if (!task.completionTime) return false;
+            const taskDate = new Date(task.completionTime).toDateString();
+            return taskDate === dateString && task.status === "completed";
+          }).length;
+
+          return { day: dayName, cleaned };
+        });
+
+        setWeeklyData(weeklyStats);
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.response?.data?.message || "Failed to fetch housekeeping data");
       } finally {
         setLoading(false);
       }
     };
 
-    if (assignedHotelId) {
-      fetchData();
-    }
-  }, [assignedHotelId]);
-
-  const totalRooms = rooms.length;
-  const occupied = rooms.filter((r) => r.status === "occupied").length;
-  const occupancy = totalRooms ? ((occupied / totalRooms) * 100).toFixed(1) : 0;
-  const roomsToClean = rooms.filter((r) => r.status === "needs-cleaning").length;
-  const cleanedToday = housekeeping.filter((h) => 
-    h.completionTime && 
-    new Date(h.completionTime).toDateString() === new Date().toDateString()
-  ).length;
-  const pendingRequests = housekeeping.filter((h) => h.status === "pending").length;
-  const inProgress = housekeeping.filter((h) => h.status === "in-progress").length;
+    fetchData();
+  }, [assignedHotelId, fetchHousekeepingTasks, fetchHousekeepingStats]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto py-4 px-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading dashboard...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-4 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -92,7 +146,7 @@ const HousekeepingDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Total Rooms</p>
-              <p className="text-2xl font-primary">{totalRooms}</p>
+              <p className="text-2xl font-primary">{stats.totalRooms}</p>
             </div>
           </div>
 
@@ -102,7 +156,7 @@ const HousekeepingDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Rooms to Clean</p>
-              <p className="text-2xl font-primary">{roomsToClean}</p>
+              <p className="text-2xl font-primary">{stats.roomsToClean}</p>
             </div>
           </div>
 
@@ -112,7 +166,7 @@ const HousekeepingDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">In Progress</p>
-              <p className="text-2xl font-primary">{inProgress}</p>
+              <p className="text-2xl font-primary">{stats.inProgress}</p>
             </div>
           </div>
 
@@ -122,7 +176,7 @@ const HousekeepingDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-secondary text-gray-700">Cleaned Today</p>
-              <p className="text-2xl font-primary">{cleanedToday}</p>
+              <p className="text-2xl font-primary">{stats.cleanedToday}</p>
             </div>
           </div>
         </div>
@@ -132,7 +186,7 @@ const HousekeepingDashboard = () => {
           <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-primary mb-4">Cleaning Progress – Last 7 Days</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={mockCleaning}>
+              <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
@@ -149,16 +203,20 @@ const HousekeepingDashboard = () => {
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-primary mb-4">Recent Tasks</h3>
-            <ul className="space-y-3">
-              {housekeeping.slice(0, 3).map((hk) => (
-                <li key={hk._id} className="flex justify-between text-sm font-secondary">
-                  <span className="font-medium">Room {hk.room?.roomNumber || 'N/A'}</span>
-                  <span className="text-gray-700">
-                    {hk.taskType.replace('_', ' ')} – {hk.status.replace('-', ' ')}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {housekeepingTasks.length === 0 ? (
+              <p className="text-sm text-gray-500">No recent tasks</p>
+            ) : (
+              <ul className="space-y-3">
+                {housekeepingTasks.slice(0, 3).map((hk) => (
+                  <li key={hk._id} className="flex justify-between text-sm font-secondary">
+                    <span className="font-medium">Room {hk.room?.roomNumber || 'N/A'}</span>
+                    <span className="text-gray-700 capitalize">
+                      {hk.taskType.replace(/_/g, ' ')} – {hk.status.replace(/-/g, ' ')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 

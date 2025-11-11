@@ -1,89 +1,59 @@
 import { useState, useEffect } from "react";
 import { Calendar, Clock, CheckCircle, AlertTriangle, Filter, Search, User, Home, Clock as ClockIcon } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../services/api";
+import { useDashboardContext } from "../../context/DashboardContext";
 
 const HousekeepingTaskManagement = () => {
-  const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState({ status: 'all', priority: 'all', taskType: 'all' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  
   const { user } = useAuth();
+  const { 
+    housekeepingTasks,
+    fetchHousekeepingTasks, 
+    updateHousekeepingTaskStatus,
+    filterHousekeepingTasks,
+    searchHousekeepingTasks 
+  } = useDashboardContext();
 
-  // Mock data for tasks - in a real app, this would come from the API
-  const mockTasks = [
-    {
-      _id: 1,
-      room: { roomNumber: '101', roomType: 'Standard', floor: 1 },
-      assignedTo: { username: 'Jane Smith' },
-      taskType: 'routine_cleaning',
-      priority: 'medium',
-      status: 'pending',
-      scheduledTime: new Date(),
-      notes: 'Guest requested extra towels',
-      issues: []
-    },
-    {
-      _id: 2,
-      room: { roomNumber: '205', roomType: 'Deluxe', floor: 2 },
-      assignedTo: { username: 'Jane Smith' },
-      taskType: 'checkout_cleaning',
-      priority: 'high',
-      status: 'in-progress',
-      scheduledTime: new Date(),
-      notes: 'Quick turnaround needed',
-      issues: []
-    },
-    {
-      _id: 3,
-      room: { roomNumber: '312', roomType: 'Executive', floor: 3 },
-      assignedTo: { username: 'Jane Smith' },
-      taskType: 'deep_cleaning',
-      priority: 'low',
-      status: 'completed',
-      scheduledTime: new Date(),
-      completionTime: new Date(),
-      notes: 'Deep clean requested by manager',
-      issues: []
-    },
-    {
-      _id: 4,
-      room: { roomNumber: '103', roomType: 'Standard', floor: 1 },
-      assignedTo: { username: 'Jane Smith' },
-      taskType: 'turndown_service',
-      priority: 'urgent',
-      status: 'pending',
-      scheduledTime: new Date(),
-      notes: 'VIP guest',
-      issues: [
-        { description: 'Missing toiletries', reportedAt: new Date(), resolved: false }
-      ]
-    }
-  ];
+  // Get assigned hotel ID
+  const assignedHotelId = user?.assignments?.[0]?.hotel?._id || user?.assignments?.[0]?.hotel;
 
+  // Initial data fetch
   useEffect(() => {
-    const fetchTasks = async () => {
+    const loadTasks = async () => {
       try {
-        // In a real application, we'd fetch from the API
-        // const response = await api.get(`/housekeeping?assignedTo=${user._id}`);
-        // setTasks(response.data.data);
-        setTasks(mockTasks);
-        setFilteredTasks(mockTasks);
+        setLoading(true);
+        setError('');
+        
+        // Fetch tasks assigned to this user
+        await fetchHousekeepingTasks();
       } catch (err) {
-        setError('Failed to fetch tasks');
         console.error('Error fetching tasks:', err);
+        setError(err.message || 'Failed to fetch tasks');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
-  }, [user]);
+    loadTasks();
+  }, [fetchHousekeepingTasks]);
 
+  // Filter tasks based on user selection and search term
   useEffect(() => {
-    let filtered = tasks;
+    let filtered = housekeepingTasks;
+
+    // Filter by assigned user
+    if (user?._id) {
+      filtered = filtered.filter(task => 
+        task.assignedTo?._id === user._id || 
+        task.assignedTo === user._id
+      );
+    }
 
     // Apply status filter
     if (filter.status !== 'all') {
@@ -103,27 +73,33 @@ const HousekeepingTaskManagement = () => {
     // Apply search term filter
     if (searchTerm) {
       filtered = filtered.filter(task => 
-        task.room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.room.roomType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.taskType.toLowerCase().replace('_', ' ').includes(searchTerm.toLowerCase())
+        task.room?.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.room?.roomType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.taskType?.toLowerCase().replace(/_/g, ' ').includes(searchTerm.toLowerCase()) ||
+        task.notes?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     setFilteredTasks(filtered);
-  }, [tasks, filter, searchTerm]);
+  }, [housekeepingTasks, filter, searchTerm, user]);
 
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
-      // In a real application, we'd update via API
-      // await api.put(`/housekeeping/${taskId}`, { status: newStatus });
+      setError('');
+      setSuccessMessage('');
       
-      // Update local state
-      setTasks(tasks.map(task => 
-        task._id === taskId ? { ...task, status: newStatus } : task
-      ));
+      await updateHousekeepingTaskStatus(taskId, newStatus);
+      
+      // Refresh tasks
+      await fetchHousekeepingTasks();
+      
+      setSuccessMessage(`Task status updated to ${newStatus.replace(/-/g, ' ')}`);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError('Failed to update task status');
       console.error('Error updating task:', err);
+      setError(err.message || 'Failed to update task status');
     }
   };
 
@@ -153,16 +129,18 @@ const HousekeepingTaskManagement = () => {
       case 'deep_cleaning': return 'Deep Cleaning';
       case 'checkout_cleaning': return 'Checkout Cleaning';
       case 'turndown_service': return 'Turndown Service';
-      default: return taskType;
+      default: return taskType?.replace(/_/g, ' ') || 'Unknown';
     }
   };
 
   if (loading) {
-    return <div className="container mx-auto py-14 px-4">Loading tasks...</div>;
-  }
-
-  if (error) {
-    return <div className="container mx-auto py-14 px-4 text-red-600">{error}</div>;
+    return (
+      <div className="container mx-auto py-14 px-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading tasks...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -171,6 +149,19 @@ const HousekeepingTaskManagement = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-primary text-accent px-3">Housekeeping Tasks</h2>
         </div>
+
+        {/* Success/Error Messages */}
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-600">{successMessage}</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
 
         {/* Filters and Search */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
@@ -227,105 +218,112 @@ const HousekeepingTaskManagement = () => {
 
           {/* Tasks Grid */}
           <div className="space-y-4">
-            {filteredTasks.map((task) => (
-              <div key={task._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                      <Home className="w-5 h-5 text-accent mr-1" />
-                      <span className="font-medium">Room {task.room.roomNumber}</span>
+            {filteredTasks.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No tasks found matching your filters
+              </div>
+            ) : (
+              filteredTasks.map((task) => (
+                <div key={task._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <Home className="w-5 h-5 text-accent mr-1" />
+                        <span className="font-medium">Room {task.room?.roomNumber || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                          <ClockIcon className="w-3 h-3 mr-1" />
+                          {task.priority?.charAt(0).toUpperCase() + task.priority?.slice(1) || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                          <ClockIcon className="w-3 h-3 mr-1" />
+                          {task.status?.replace(/-/g, ' ') || 'N/A'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                        <ClockIcon className="w-3 h-3 mr-1" />
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                        <ClockIcon className="w-3 h-3 mr-1" />
-                        {task.status.replace('-', ' ')}
-                      </span>
+                    
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">
+                        {task.scheduledTime ? new Date(task.scheduledTime).toLocaleDateString() : 'Not scheduled'}
+                      </div>
+                      {task.room?.floor && (
+                        <div className="text-xs text-gray-500">
+                          Floor {task.room.floor}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  <div className="text-right">
-                    <div className="text-sm text-gray-600">
-                      {new Date(task.scheduledTime).toLocaleDateString()}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Floor {task.room.floor}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2 mb-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Task Type:</span>
-                    <span className="font-medium">{getTaskTypeLabel(task.taskType)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Room Type:</span>
-                    <span className="font-medium">{task.room.roomType}</span>
-                  </div>
-                  {task.notes && (
+                  <div className="space-y-2 mb-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Notes:</span>
-                      <span className="font-medium">{task.notes}</span>
+                      <span className="text-gray-600">Task Type:</span>
+                      <span className="font-medium">{getTaskTypeLabel(task.taskType)}</span>
                     </div>
-                  )}
-                </div>
-                
-                {task.issues.length > 0 && (
-                  <div className="mb-3">
-                    <div className="flex items-center text-sm text-red-600 mb-1">
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      <span>Issues Reported</span>
-                    </div>
-                    <ul className="text-sm text-gray-700 ml-5 list-disc">
-                      {task.issues.map((issue, index) => (
-                        <li key={index}>{issue.description}</li>
-                      ))}
-                    </ul>
+                    {task.room?.roomType && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Room Type:</span>
+                        <span className="font-medium">{task.room.roomType}</span>
+                      </div>
+                    )}
+                    {task.notes && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Notes:</span>
+                        <span className="font-medium">{task.notes}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                
-                <div className="flex space-x-2">
-                  {task.status === 'pending' && (
-                    <button 
-                      onClick={() => updateTaskStatus(task._id, 'in-progress')}
-                      className="flex-1 bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md text-sm"
-                    >
-                      Start Task
-                    </button>
+                  
+                  {task.issues?.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center text-sm text-red-600 mb-1">
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        <span>Issues Reported</span>
+                      </div>
+                      <ul className="text-sm text-gray-700 ml-5 list-disc">
+                        {task.issues.map((issue, index) => (
+                          <li key={index}>{issue.description}</li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
-                  {task.status === 'in-progress' && (
-                    <button 
-                      onClick={() => updateTaskStatus(task._id, 'completed')}
-                      className="flex-1 bg-green-600 text-white hover:bg-green-700 transition-colors py-2 px-4 rounded-md text-sm"
-                    >
-                      Complete Task
-                    </button>
-                  )}
-                  {task.status === 'completed' && (
-                    <button 
-                      onClick={() => updateTaskStatus(task._id, 'verified')}
-                      className="flex-1 bg-purple-600 text-white hover:bg-purple-700 transition-colors py-2 px-4 rounded-md text-sm"
-                    >
-                      Verify Task
-                    </button>
-                  )}
-                  {task.status === 'completed' || task.status === 'verified' ? (
-                    <button 
-                      className="flex-1 bg-gray-200 text-gray-800 cursor-not-allowed py-2 px-4 rounded-md text-sm"
-                      disabled
-                    >
-                      Completed
-                    </button>
-                  ) : null}
+                  
+                  <div className="flex space-x-2">
+                    {task.status === 'pending' && (
+                      <button 
+                        onClick={() => updateTaskStatus(task._id, 'in-progress')}
+                        className="flex-1 bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md text-sm"
+                      >
+                        Start Task
+                      </button>
+                    )}
+                    {task.status === 'in-progress' && (
+                      <button 
+                        onClick={() => updateTaskStatus(task._id, 'completed')}
+                        className="flex-1 bg-green-600 text-white hover:bg-green-700 transition-colors py-2 px-4 rounded-md text-sm"
+                      >
+                        Complete Task
+                      </button>
+                    )}
+                    {task.status === 'completed' && (
+                      <button 
+                        onClick={() => updateTaskStatus(task._id, 'verified')}
+                        className="flex-1 bg-purple-600 text-white hover:bg-purple-700 transition-colors py-2 px-4 rounded-md text-sm"
+                      >
+                        Verify Task
+                      </button>
+                    )}
+                    {(task.status === 'completed' || task.status === 'verified') && (
+                      <div className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm text-center">
+                        {task.status === 'verified' ? 'Verified' : 'Completed'}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

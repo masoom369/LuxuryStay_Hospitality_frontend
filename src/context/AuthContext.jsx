@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.jsx
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 

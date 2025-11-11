@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   BarChart,
   Bar,
@@ -14,54 +14,114 @@ import {
   Pie
 } from "recharts";
 import { 
-  Calendar,
-  TrendingUp, 
-  TrendingDown,
   Download,
-  Filter
+  Loader2
 } from "lucide-react";
+import { useDashboardContext } from "../../context/DashboardContext";
 
 const OccupancyReports = () => {
   const [timeRange, setTimeRange] = useState('month');
   const [filter, setFilter] = useState('all');
+  const [occupancyData, setOccupancyData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const { fetchOccupancyReports, exportReport } = useDashboardContext();
 
-  // Mock data for occupancy reports
-  const occupancyData = [
-    { date: "Nov 1", occupancy: 78 },
-    { date: "Nov 2", occupancy: 82 },
-    { date: "Nov 3", occupancy: 85 },
-    { date: "Nov 4", occupancy: 79 },
-    { date: "Nov 5", occupancy: 92 },
-    { date: "Nov 6", occupancy: 95 },
-    { date: "Nov 7", occupancy: 91 },
-  ];
+  useEffect(() => {
+    loadOccupancyData();
+  }, [timeRange, filter]);
 
-  const occupancyByRoomType = [
-    { name: "Standard", occupancy: 75, total: 50, occupied: 38 },
-    { name: "Deluxe", occupancy: 82, total: 30, occupied: 25 },
-    { name: "Executive", occupancy: 88, total: 20, occupied: 18 },
-    { name: "Suite", occupancy: 79, total: 15, occupied: 12 },
-    { name: "Presidential", occupancy: 91, total: 5, occupied: 5 },
-  ];
-
-  const occupancyByFloor = [
-    { floor: "1st", occupancy: 85 },
-    { floor: "2nd", occupancy: 78 },
-    { floor: "3rd", occupancy: 92 },
-    { floor: "4th", occupancy: 88 },
-    { floor: "5th", occupancy: 81 },
-  ];
-
-  const occupancySummary = {
-    totalRooms: 120,
-    occupiedRooms: 98,
-    occupancyRate: 81.7,
-    availableRooms: 22,
-    checkIns: 12,
-    checkOuts: 8
+  const loadOccupancyData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await fetchOccupancyReports(timeRange, filter);
+      setOccupancyData(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load occupancy reports');
+      console.error('Error loading occupancy reports:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleExport = async () => {
+    try {
+      const blob = await exportReport('occupancy', 'pdf', { 
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), 
+        end: new Date().toISOString() 
+      }, { roomType: filter });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `occupancy-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export report');
+    }
+  };
+
+  const defaultData = {
+    occupancyTrend: [
+      { date: "Nov 1", occupancy: 78 },
+      { date: "Nov 2", occupancy: 82 },
+      { date: "Nov 3", occupancy: 85 },
+      { date: "Nov 4", occupancy: 79 },
+      { date: "Nov 5", occupancy: 92 },
+      { date: "Nov 6", occupancy: 95 },
+      { date: "Nov 7", occupancy: 91 },
+    ],
+    occupancyByRoomType: [
+      { name: "Standard", occupancy: 75, total: 50, occupied: 38 },
+      { name: "Deluxe", occupancy: 82, total: 30, occupied: 25 },
+      { name: "Executive", occupancy: 88, total: 20, occupied: 18 },
+      { name: "Suite", occupancy: 79, total: 15, occupied: 12 },
+      { name: "Presidential", occupancy: 91, total: 5, occupied: 5 },
+    ],
+    occupancyByFloor: [
+      { floor: "1st", occupancy: 85 },
+      { floor: "2nd", occupancy: 78 },
+      { floor: "3rd", occupancy: 92 },
+      { floor: "4th", occupancy: 88 },
+      { floor: "5th", occupancy: 81 },
+    ],
+    summary: {
+      totalRooms: 120,
+      occupiedRooms: 98,
+      occupancyRate: 81.7,
+      availableRooms: 22,
+      checkIns: 12,
+      checkOuts: 8
+    }
+  };
+
+  const data = occupancyData || defaultData;
   const COLORS = ['#a37d4c', '#b89a67', '#d4b98c', '#e6d5b8', '#f0e6d2'];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-14 px-4 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <span className="ml-2 text-gray-600">Loading occupancy reports...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-14 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-14 px-4">
@@ -92,7 +152,10 @@ const OccupancyReports = () => {
               <option value="suite">Suite</option>
               <option value="presidential">Presidential</option>
             </select>
-            <button className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md flex items-center">
+            <button 
+              onClick={handleExport}
+              className="bg-accent text-white hover:bg-accent/90 transition-colors py-2 px-4 rounded-md flex items-center"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
@@ -103,23 +166,23 @@ const OccupancyReports = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Total Rooms</p>
-            <p className="text-2xl font-bold text-accent">{occupancySummary.totalRooms}</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.totalRooms || 0}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Occupied</p>
-            <p className="text-2xl font-bold text-accent">{occupancySummary.occupiedRooms}</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.occupiedRooms || 0}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Available</p>
-            <p className="text-2xl font-bold text-accent">{occupancySummary.availableRooms}</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.availableRooms || 0}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Occupancy Rate</p>
-            <p className="text-2xl font-bold text-accent">{occupancySummary.occupancyRate}%</p>
+            <p className="text-2xl font-bold text-accent">{data.summary?.occupancyRate || 0}%</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600">Net Change</p>
-            <p className="text-2xl font-bold text-accent">+4</p>
+            <p className="text-2xl font-bold text-accent">+{(data.summary?.checkIns || 0) - (data.summary?.checkOuts || 0)}</p>
           </div>
         </div>
 
@@ -129,7 +192,7 @@ const OccupancyReports = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Occupancy Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={occupancyData}>
+              <LineChart data={data.occupancyTrend || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis domain={[0, 100]} />
@@ -143,7 +206,7 @@ const OccupancyReports = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Occupancy by Floor</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={occupancyByFloor}>
+              <BarChart data={data.occupancyByFloor || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="floor" />
                 <YAxis domain={[0, 100]} />
@@ -159,7 +222,7 @@ const OccupancyReports = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <h3 className="text-lg font-primary text-accent mb-4">Occupancy by Room Type</h3>
             <div className="space-y-4">
-              {occupancyByRoomType.map((type, index) => (
+              {(data.occupancyByRoomType || []).map((type, index) => (
                 <div key={index}>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">{type.name}</span>
@@ -187,7 +250,7 @@ const OccupancyReports = () => {
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={occupancyByRoomType}
+                  data={data.occupancyByRoomType || []}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -196,7 +259,7 @@ const OccupancyReports = () => {
                   dataKey="occupied"
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {occupancyByRoomType.map((entry, index) => (
+                  {(data.occupancyByRoomType || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -222,7 +285,7 @@ const OccupancyReports = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {occupancyByRoomType.map((type, index) => (
+                {(data.occupancyByRoomType || []).map((type, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{type.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{type.total}</td>
