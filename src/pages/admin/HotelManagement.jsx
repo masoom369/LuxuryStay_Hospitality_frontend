@@ -172,7 +172,7 @@ const HotelManagement = () => {
               render: (hotel) => (
                 hotel.images && hotel.images.length > 0 ? (
                   <img
-                    src={`http://localhost:5000/uploads/${hotel.images[0]}`}
+                    src={`${import.meta.env.VITE_API_URL}/uploads/${hotel.images[0]}`}
                     alt={hotel.name}
                     className="w-16 h-16 object-cover rounded"
                   />

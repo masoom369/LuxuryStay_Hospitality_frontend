@@ -3,17 +3,25 @@ import { Star } from 'lucide-react';
 import { usePublicPagesContext } from '../context/PublicPagesContext';
 
 const Reviews = ({ hotelId, roomId = null }) => {
-  const { fetchReviews, loading: contextLoading } = usePublicPagesContext();
+  const { fetchReviewsByHotel, fetchReviewsByRoom, loading: contextLoading } = usePublicPagesContext();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
-    if (!hotelId) return; // Only proceed if hotelId is provided
+    if (!hotelId && !roomId) return; // Only proceed if either hotelId or roomId is provided
 
     const loadReviews = async () => {
       try {
-        // For now, we're only fetching reviews by hotelId (fetchReviews in context doesn't support roomId)
-        const reviewsData = await fetchReviews(hotelId);
+        let reviewsData = [];
+        
+        if (roomId) {
+          // Fetch reviews by room ID
+          reviewsData = await fetchReviewsByRoom(roomId);
+        } else if (hotelId) {
+          // Fetch reviews by hotel ID
+          reviewsData = await fetchReviewsByHotel(hotelId);
+        }
+        
         setReviews(reviewsData);
 
         // Calculate average rating
@@ -31,7 +39,7 @@ const Reviews = ({ hotelId, roomId = null }) => {
     };
 
     loadReviews();
-  }, [hotelId]); // Removed fetchReviews from dependencies as it's stable due to useCallback
+  }, [hotelId, roomId, fetchReviewsByHotel, fetchReviewsByRoom]); // Include the functions in dependencies
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (

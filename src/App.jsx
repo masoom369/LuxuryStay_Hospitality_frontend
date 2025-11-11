@@ -69,11 +69,11 @@ const App = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/hotels" element={<HotelListingPage />} />
             <Route path="/hotels/:id" element={<HotelDetailsPage />} />
+            <Route path="/rooms/:id" element={<RoomDetailPage />} />
             <Route
               path="/roompackage/:id"
               element={<RoomPackageDetailPage />}
             />
-            <Route path="/room/:id" element={<RoomDetailPage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/faq" element={<FAQPage />} />
@@ -91,39 +91,72 @@ const App = () => {
             <Route path="/admin/hotels" element={<HotelManagement />} />
             <Route path="/admin/rooms" element={<RoomsManagement />} />
             <Route path="/admin/contact" element={<ManageContactUs />} />
-            
+
             {/* Guest Routes */}
             <Route path="/guest/dashboard" element={<GuestDashboard />} />
             <Route path="/guest/my-bookings" element={<MyBookingsPage />} />
-            <Route path="/guest/booking-history" element={<BookingHistoryManagement />} />
-            <Route path="/guest/service-requests" element={<ServiceRequestsInterface />} />
-            <Route path="/guest/feedback" element={<FeedbackSubmissionForm />} />
+            <Route
+              path="/guest/booking-history"
+              element={<BookingHistoryManagement />}
+            />
+            <Route
+              path="/guest/service-requests"
+              element={<ServiceRequestsInterface />}
+            />
+            <Route
+              path="/guest/feedback"
+              element={<FeedbackSubmissionForm />}
+            />
             <Route path="/guest/room-service" element={<InRoomServices />} />
-            
+
             {/* Manager Routes */}
             <Route path="/manager/reporting" element={<ReportingDashboard />} />
             <Route path="/manager/occupancy" element={<OccupancyReports />} />
             <Route path="/manager/revenue" element={<RevenueReports />} />
-            <Route path="/manager/feedback" element={<GuestFeedbackAnalytics />} />
-            <Route path="/manager/performance" element={<PerformanceMetricsDashboard />} />
-            <Route path="/manager/export" element={<ExportReportsInterface />} />
-            <Route path="/manager/feedback-management" element={<FeedbackManagement />} />
-            
+            <Route
+              path="/manager/feedback"
+              element={<GuestFeedbackAnalytics />}
+            />
+            <Route
+              path="/manager/performance"
+              element={<PerformanceMetricsDashboard />}
+            />
+            <Route
+              path="/manager/export"
+              element={<ExportReportsInterface />}
+            />
+            <Route
+              path="/manager/feedback-management"
+              element={<FeedbackManagement />}
+            />
+
             {/* Receptionist Routes */}
-            <Route path="/receptionist/create-guest" element={<CreateGuestAccount />} />
+            <Route
+              path="/receptionist/create-guest"
+              element={<CreateGuestAccount />}
+            />
             <Route path="/receptionist/walk-in" element={<WalkInBooking />} />
-            <Route path="/receptionist/room-availability" element={<RoomAvailability />} />
-            
+            <Route
+              path="/receptionist/room-availability"
+              element={<RoomAvailability />}
+            />
+
             {/* Housekeeping Routes */}
-            <Route path="/housekeeping/tasks" element={<HousekeepingTaskManagement />} />
-            
+            <Route
+              path="/housekeeping/tasks"
+              element={<HousekeepingTaskManagement />}
+            />
+
             {/* Maintenance Routes */}
-            <Route path="/maintenance/issues" element={<MaintenanceIssueManagement />} />
+            <Route
+              path="/maintenance/issues"
+              element={<MaintenanceIssueManagement />}
+            />
+
+            {/* Shared Routes */}
+            <Route path="/account" element={<AccountPage />} />
           </Route>
 
-          {/* Shared Routes */}
-          <Route path="/account" element={<AccountPage />} />
-          
           {/* 404 Page */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>

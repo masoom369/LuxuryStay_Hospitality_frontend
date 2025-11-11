@@ -29,14 +29,14 @@ const RoomDetailPage = () => {
     specialRequests,
     bookingAlert,
     bookingLoading,
-    setBookingCheckInDate,
-    setBookingCheckOutDate,
-    setBookingHotel,
-    setBookingRooms,
-    setBookingGuests,
-    setBookingMaxGuests,
-    setBookingSpecialRequests,
-    updateBookingAlert,
+    setCheckInDate,
+    setCheckOutDate,
+    setSelectedHotel,
+    setSelectedRooms,
+    setGuests,
+    setMaxGuests,
+    setSpecialRequests,
+    setBookingAlert,
     clearBookingForm,
     handleBookingSubmission,
   } = usePublicPagesContext();
@@ -84,7 +84,7 @@ const RoomDetailPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "specialRequests") {
-      setBookingSpecialRequests(value);
+      setSpecialRequests(value);
     }
   };
 
@@ -114,7 +114,7 @@ const RoomDetailPage = () => {
   // Get image URL (first image or default)
   const roomImage =
     images && images.length > 0
-      ? `http://localhost:5000/uploads/${images[0]}`
+      ? `${import.meta.env.VITE_API_URL}/uploads/${images[0]}`
       : "/src/assets/img/room.jpg";
 
   return (
@@ -172,7 +172,7 @@ const RoomDetailPage = () => {
               <h3 className="h3 mb-3">Room Amenities</h3>
 
               {/* Amenities grid */}
-              <div className="grid grid-cols-2 gap-6 mb-12">
+              <div className="flex flex-wrap items-center gap-6 mb-12">
                 {amenities && amenities.length > 0 ? (
                   amenities.map((amenity, index) => (
                     <div key={index} className="flex items-center gap-x-3">
@@ -191,119 +191,6 @@ const RoomDetailPage = () => {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Right Side - Booking & Information */}
-          <div className="w-full lg:w-[40%] h-full">
-            {/* Booking */}
-            <div className="py-8 px-6 bg-accent/20 mb-12">
-              <h3 className="h3 mb-6">Your Reservation</h3>
-
-              {bookingAlert && (
-                <Alert
-                  type={bookingAlert.type}
-                  message={bookingAlert.message}
-                  onClose={() => updateBookingAlert(null)}
-                  autoClose={bookingAlert.type === "success"}
-                />
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  {/* Check-in Date */}
-                  <div className="border-r">
-                    <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
-                      Check-in
-                    </label>
-                    <CheckIn
-                      selectedDate={checkInDate}
-                      onDateChange={setBookingCheckInDate}
-                    />
-                  </div>
-
-                  {/* Check-out Date */}
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
-                      Check-out
-                    </label>
-                    <CheckOut
-                      selectedDate={checkOutDate}
-                      onDateChange={setBookingCheckOutDate}
-                      startDate={checkInDate}
-                    />
-                  </div>
-
-                  {/* Hotel Selection */}
-                  <div className="border-r col-span-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
-                      Hotel
-                    </label>
-                    <HotelDropdown
-                      value={selectedHotel}
-                      onChange={(e) => {
-                        setBookingHotel(e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  {/* Room Selection */}
-                  <div className="border-r col-span-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
-                      Rooms
-                    </label>
-                    <RoomDropdown
-                      value={selectedRooms}
-                      onChange={setBookingRooms}
-                      onMaxGuestsChange={setBookingMaxGuests}
-                      hotelId={selectedHotel}
-                      checkInDate={checkInDate}
-                      checkOutDate={checkOutDate}
-                    />
-                  </div>
-
-                  {/* Guests */}
-                  <div className="col-span-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2 text-center">
-                      Guests
-                    </label>
-                    <GuestInput
-                      value={guests}
-                      onChange={setBookingGuests}
-                      max={maxGuests}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label
-                    htmlFor="specialRequests"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Special Requests (optional)
-                  </label>
-                  <textarea
-                    id="specialRequests"
-                    name="specialRequests"
-                    rows="3"
-                    value={specialRequests}
-                    onChange={handleChange}
-                    placeholder="Any special requests or requirements..."
-                    className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={bookingLoading}
-                  className="btn btn-lg btn-primary w-full"
-                >
-                  {bookingLoading
-                    ? "Submitting..."
-                    : `Book Now for $${basePrice}`}
-                </button>
-              </form>
-            </div>
-
             <div>
               <h3 className="h3">Room Information</h3>
               <ul className="flex flex-col gap-y-4 mb-6">
@@ -328,6 +215,110 @@ const RoomDetailPage = () => {
                   <span>Room Number: {roomNumber}</span>
                 </li>
               </ul>
+            </div>
+          </div>
+
+          {/* Right Side - Booking & Information */}
+          <div className="w-full lg:w-[40%] h-full">
+            {/* Booking */}
+            <div className="py-8 px-6 bg-accent/20 mb-12">
+              <h3 className="h3 mb-6">Your Reservation</h3>
+
+              {bookingAlert && (
+                <Alert
+                  type={bookingAlert.type}
+                  message={bookingAlert.message}
+                  onClose={() => updateBookingAlert(null)}
+                  autoClose={bookingAlert.type === "success"}
+                />
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Check-in & Check-out (side by side) */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex-1 border-r">
+                    <CheckIn
+                      selectedDate={checkInDate}
+                      onDateChange={setCheckInDate}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CheckOut
+                      selectedDate={checkOutDate}
+                      onDateChange={setCheckOutDate}
+                      startDate={checkInDate}
+                    />
+                  </div>
+                </div>
+
+                {/* Hotel Selection */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Hotel
+                  </label>
+                  <HotelDropdown
+                    value={selectedHotel}
+                    onChange={(e) => setSelectedHotel(e.target.value)}
+                  />
+                </div>
+
+                {/* Room Selection */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Rooms
+                  </label>
+                  <RoomDropdown
+                    value={selectedRooms}
+                    onChange={setSelectedRooms}
+                    onMaxGuestsChange={setMaxGuests}
+                    hotelId={selectedHotel}
+                    checkInDate={checkInDate}
+                    checkOutDate={checkOutDate}
+                  />
+                </div>
+
+                {/* Guests */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Guests
+                  </label>
+                  <GuestInput
+                    value={guests}
+                    onChange={setGuests}
+                    max={maxGuests}
+                  />
+                </div>
+
+                {/* Special Requests */}
+                <div>
+                  <label
+                    htmlFor="specialRequests"
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                  >
+                    Special Requests (optional)
+                  </label>
+                  <textarea
+                    id="specialRequests"
+                    name="specialRequests"
+                    rows="3"
+                    value={specialRequests}
+                    onChange={handleChange}
+                    placeholder="Any special requests or requirements..."
+                    className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={bookingLoading}
+                  className="btn btn-lg btn-primary w-full"
+                >
+                  {bookingLoading
+                    ? "Submitting..."
+                    : `Book Now for $${basePrice}`}
+                </button>
+              </form>
             </div>
 
             <div>

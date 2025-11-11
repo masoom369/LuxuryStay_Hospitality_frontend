@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Calendar, MapPin, MessageCircle, ThumbsUp, ThumbsDown, Coffee, Car, Utensils, Home } from "lucide-react";
+import { Star, Calendar, MapPin, MessageCircle, ThumbsUp, ThumbsDown, Coffee, Car, Utensils, Home, User } from "lucide-react";
 
 const FeedbackSubmissionForm = () => {
   const [feedback, setFeedback] = useState({

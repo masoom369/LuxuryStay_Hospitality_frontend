@@ -89,7 +89,7 @@ const RoomCarousel = ({ hotelId }) => {
             {currentRooms.map((room) => {
               const roomImage =
                 room.images && room.images.length > 0
-                  ? `http://localhost:5000/uploads/${room.images[0]}`
+                  ? `${import.meta.env.VITE_API_URL}/uploads/${room.images[0]}`
                   : 'https://placehold.co/600x400?text=Room+Image';
 
               return (
@@ -130,7 +130,7 @@ const RoomCarousel = ({ hotelId }) => {
                         ))}
                       </div>
                       <Link
-                        to={`/room/${room._id}`}
+                        to={`/rooms/${room._id}`}
                         className="btn btn-secondary w-full py-2 px-3 rounded-md text-sm"
                       >
                         View Details

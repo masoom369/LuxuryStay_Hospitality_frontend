@@ -44,7 +44,7 @@ const ImageUploader = ({ onChange, multiple = false, initialImages = [] }) => {
           {images.map((image, index) => (
             <div key={index} className="relative">
               <img
-                src={typeof image === 'string' ? `http://localhost:5000/uploads/${image}` : URL.createObjectURL(image)}
+                src={typeof image === 'string' ? `${import.meta.env.VITE_API_URL}/uploads/${image}` : URL.createObjectURL(image)}
                 alt={`Upload ${index + 1}`}
                 className="w-full h-24 object-cover rounded-lg"
               />

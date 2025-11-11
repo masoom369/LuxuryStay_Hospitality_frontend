@@ -137,16 +137,27 @@ export const PublicPagesProvider = ({ children }) => {
   // 3️⃣ REVIEWS / FEEDBACK FETCH FUNCTIONS
   // =====================================================
 
-  // Fetch reviews / feedback (optionally filtered by hotel)
-  const fetchReviews = useCallback(async (hotelId = null) => {
+  // Fetch reviews / feedback for a specific room
+  const fetchReviewsByHotel = useCallback(async (hotelId = null) => {
     setLoading((prev) => ({ ...prev, reviews: true }));
     try {
-      const response = hotelId
-        ? await api.get(`/feedback/hotel/${hotelId}`)
-        : await api.get("/feedback");
+      const response = await api.get(`/feedback/hotel/${hotelId}`);
       return response.data.data || [];
     } catch (error) {
       throw new Error(handleError(error, "Failed to fetch reviews"));
+    } finally {
+      setLoading((prev) => ({ ...prev, reviews: false }));
+    }
+  }, []);
+
+  // Fetch reviews / feedback for a specific room
+  const fetchReviewsByRoom = useCallback(async (roomId) => {
+    setLoading((prev) => ({ ...prev, reviews: true }));
+    try {
+      const response = await api.get(`/feedback/room/${roomId}`);
+      return response.data.data || [];
+    } catch (error) {
+      throw new Error(handleError(error, "Failed to fetch reviews for room"));
     } finally {
       setLoading((prev) => ({ ...prev, reviews: false }));
     }
@@ -316,7 +327,8 @@ export const PublicPagesProvider = ({ children }) => {
     fetchRooms,
 
     // Reviews / Feedback methods
-    fetchReviews,
+    fetchReviewsByHotel,
+    fetchReviewsByRoom,
     fetchTestimonials,
 
     // Contact & Booking
