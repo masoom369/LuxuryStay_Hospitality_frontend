@@ -36,7 +36,7 @@ This is the frontend application for the LuxuryStay Hospitality hotel management
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/masoom369/LuxuryStay_Hospitality_frontend.git
    ```
 
 2. Navigate to the frontend directory:
